@@ -10,6 +10,7 @@ const MenuPreview = () => {
 
   useEffect(() => {
     const fetchMenu = async () => {
+      setError(''); // Clear any previous errors
       try {
         const result = await fakeBackend.getMenuByToken(token);
         setData(result);
