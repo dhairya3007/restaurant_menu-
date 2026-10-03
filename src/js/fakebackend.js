@@ -3,6 +3,14 @@ const DELAY = 0; // Simulated network delay in milliseconds
 const wait = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
 const initializeDB = () => {
+  // Auto-clear old database to apply the new quantity fields
+  if (localStorage.getItem('db_version') !== 'v2') {
+    localStorage.removeItem('restaurant_db_clients');
+    localStorage.removeItem('restaurant_db_categories');
+    localStorage.removeItem('restaurant_db_dishes');
+    localStorage.setItem('db_version', 'v2');
+  }
+
   const dummyClients = [
     {
       id: 'client-1',
