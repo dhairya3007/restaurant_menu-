@@ -22,6 +22,9 @@ const MenuPreview = () => {
     };
     
     if (token) {
+      // Increment scan count only once when the page initially loads
+      fakeBackend.incrementScanCount(token);
+      
       fetchMenu();
       
       // Listen for local storage changes to auto-update the menu

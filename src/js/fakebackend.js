@@ -292,9 +292,6 @@ export const fakeBackend = {
     if (!client) throw new Error('Invalid QR Token');
     if (client.isActive === false) throw new Error('This menu is currently deactivated by the restaurant owner.');
 
-    // Increment scan count in background
-    setTimeout(() => fakeBackend.incrementScanCount(qrToken), 0);
-
     const categories = await fakeBackend.getCategoriesByClientId(client.id);
     let dishes = await fakeBackend.getDishesByClientId(client.id);
     // Filter out deactivated dishes for public view
