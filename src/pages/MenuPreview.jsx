@@ -43,17 +43,18 @@ const MenuPreview = () => {
   document.body.className = `theme-${client?.theme || 'modern'}`;
 
   return (
-    <div className="min-vh-100 pb-5" style={{ background: 'var(--bg-color)', color: 'var(--text-color)' }}>
-      {/* Header */}
-      <div className="menu-header shadow-sm">
-        <h1 className="fw-bold" style={{ fontSize: '2.5rem' }}>{client.name || 'Our Menu'}</h1>
-      </div>
+    <div className="min-vh-100 d-flex justify-content-center" style={{ backgroundColor: '#f0f2f5' }}>
+      <div className="pb-5 shadow-lg position-relative" style={{ maxWidth: '480px', width: '100%', background: 'var(--bg-color)', color: 'var(--text-color)', minHeight: '100vh', overflowX: 'hidden' }}>
+        {/* Header */}
+        <div className="menu-header shadow-sm text-center">
+          <h1 className="fw-bold mb-0" style={{ fontSize: '2rem' }}>{client.name || 'Our Menu'}</h1>
+        </div>
 
-      <div className="container mt-4">
-        {categories.length === 0 && dishes.length === 0 ? (
-          <div className="text-center mt-5 p-5 glass-card">
-            <h3>Menu is empty.</h3>
-          </div>
+        <div className="container-fluid mt-4 px-3">
+          {categories.length === 0 && dishes.length === 0 ? (
+            <div className="text-center mt-5 p-4 glass-card">
+              <h3>Menu is empty.</h3>
+            </div>
         ) : (
           categories.map(category => {
             const categoryDishes = dishes.filter(d => d.categoryId === category.id);
@@ -62,12 +63,12 @@ const MenuPreview = () => {
             return (
               <div key={category.id} className="mb-5">
                 <div className="text-center">
-                  <h2 className="menu-category-title fw-bold">{category.name}</h2>
+                  <h2 className="menu-category-title fw-bold fs-3">{category.name}</h2>
                 </div>
                 
-                <div className="row g-4">
+                <div className="row g-3">
                   {categoryDishes.map(dish => (
-                    <div key={dish.id} className="col-md-6 col-lg-4">
+                    <div key={dish.id} className="col-12">
                       <div className="glass-card dish-card h-100">
                         {dish.image && (
                           <img src={dish.image} alt={dish.name} className="dish-image" />
@@ -90,6 +91,7 @@ const MenuPreview = () => {
             );
           })
         )}
+        </div>
       </div>
     </div>
   );
