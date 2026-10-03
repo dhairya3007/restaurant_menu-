@@ -43,10 +43,10 @@ const initializeDB = () => {
   ];
 
   const dummyDishes = [
-    { id: 'dish-1', name: 'Classic Margherita', price: '299', description: 'Fresh tomatoes, mozzarella, and basil on a thin crust.', type: 'Veg', image: 'https://images.unsplash.com/photo-1574071318508-1cdbab80d002?w=500&auto=format&fit=crop&q=60', categoryId: 'cat-1', isActive: true },
-    { id: 'dish-2', name: 'Pepperoni Feast', price: '399', description: 'Loaded with premium pepperoni and extra cheese.', type: 'Non-Veg', image: 'https://images.unsplash.com/photo-1628840042765-356cda07504e?w=500&auto=format&fit=crop&q=60', categoryId: 'cat-1', isActive: true },
-    { id: 'dish-3', name: 'Garlic Breadsticks', price: '149', description: 'Freshly baked with garlic butter and herbs.', type: 'Veg', image: 'https://images.unsplash.com/photo-1573140247632-f8fd74997d5c?w=500&auto=format&fit=crop&q=60', categoryId: 'cat-2', isActive: true },
-    { id: 'dish-4', name: 'Double Cheese Burger', price: '249', description: 'Two juicy beef patties with melted cheddar.', type: 'Non-Veg', image: 'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=500&auto=format&fit=crop&q=60', categoryId: 'cat-3', isActive: true }
+    { id: 'dish-1', name: 'Classic Margherita', price: '299', quantity: '10 inch', type: 'Veg', image: 'https://images.unsplash.com/photo-1574071318508-1cdbab80d002?w=500&auto=format&fit=crop&q=60', categoryId: 'cat-1', isActive: true },
+    { id: 'dish-2', name: 'Pepperoni Feast', price: '399', quantity: '12 inch', type: 'Non-Veg', image: 'https://images.unsplash.com/photo-1628840042765-356cda07504e?w=500&auto=format&fit=crop&q=60', categoryId: 'cat-1', isActive: true },
+    { id: 'dish-3', name: 'Garlic Breadsticks', price: '149', quantity: '4 pieces', type: 'Veg', image: 'https://images.unsplash.com/photo-1573140247632-f8fd74997d5c?w=500&auto=format&fit=crop&q=60', categoryId: 'cat-2', isActive: true },
+    { id: 'dish-4', name: 'Double Cheese Burger', price: '249', quantity: '250gm', type: 'Non-Veg', image: 'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=500&auto=format&fit=crop&q=60', categoryId: 'cat-3', isActive: true }
   ];
 
   if (!localStorage.getItem('restaurant_db_clients')) {

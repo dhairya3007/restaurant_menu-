@@ -81,8 +81,7 @@ const MenuPreview = () => {
                             </h4>
                             <span className="fw-bold fs-5 text-primary">₹{dish.price}</span>
                           </div>
-                          {dish.description && <p className="text-muted mb-2 small">{dish.description}</p>}
-                          {dish.quantity && <span className="badge bg-light text-dark border">{dish.quantity}</span>}
+                          {dish.quantity && <p className="text-muted mb-0 mt-1">{dish.quantity}</p>}
                         </div>
                       </div>
                     </div>
