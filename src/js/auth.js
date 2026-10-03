@@ -9,7 +9,7 @@ export const auth = {
     if (!email || !password) throw new Error("Email and password are required.");
     
     // Super Admin check
-    if (email.toLowerCase().includes('admin')) {
+    if (email.toLowerCase() === 'admin@test.com') {
       const user = { id: 'admin-001', email, role: 'super_admin' };
       localStorage.setItem('auth_user', JSON.stringify(user));
       return user;

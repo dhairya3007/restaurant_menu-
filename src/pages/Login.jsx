@@ -66,7 +66,10 @@ const Login = () => {
         </form>
         
         <div className="text-center mt-4">
-          <small className="text-muted">Hint: Use 'admin' in email for Super Admin.</small>
+          <div className="text-muted small">
+            <strong>Admin Login:</strong> admin@test.com / any password<br />
+            <strong>Demo Client Login:</strong> admin@pizzahouse.com / password123
+          </div>
         </div>
       </div>
     </div>
