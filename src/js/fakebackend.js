@@ -4,11 +4,11 @@ const wait = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
 const initializeDB = () => {
   // Auto-clear old database to apply the new quantity fields
-  if (localStorage.getItem('db_version') !== 'v2') {
+  if (localStorage.getItem('db_version') !== 'v3') {
     localStorage.removeItem('restaurant_db_clients');
     localStorage.removeItem('restaurant_db_categories');
     localStorage.removeItem('restaurant_db_dishes');
-    localStorage.setItem('db_version', 'v2');
+    localStorage.setItem('db_version', 'v3');
   }
 
   const dummyClients = [
@@ -25,7 +25,7 @@ const initializeDB = () => {
       expireAt: new Date(new Date().setFullYear(new Date().getFullYear() + 1)).toISOString(),
       businessDetails: { name: 'The Pizza House', phone: '+1 234 567 8900', address: '123 Pizza Street, Food City', logo: '' },
       isActive: true,
-      scanCount: 42
+      scanCount: 0
     },
     {
       id: 'client-2',
@@ -40,7 +40,7 @@ const initializeDB = () => {
       expireAt: new Date(new Date().setMonth(new Date().getMonth() + 6)).toISOString(),
       businessDetails: { name: 'Burger Queen', phone: '+1 987 654 3210', address: '456 Burger Avenue, Food City', logo: '' },
       isActive: true,
-      scanCount: 15
+      scanCount: 0
     }
   ];
 
