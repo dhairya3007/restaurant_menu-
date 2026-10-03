@@ -19,7 +19,20 @@ const MenuPreview = () => {
         setLoading(false);
       }
     };
-    if (token) fetchMenu();
+    
+    if (token) {
+      fetchMenu();
+      
+      // Listen for local storage changes to auto-update the menu
+      const handleStorageChange = (e) => {
+        if (e.key && e.key.startsWith('restaurant_db_')) {
+          fetchMenu();
+        }
+      };
+      
+      window.addEventListener('storage', handleStorageChange);
+      return () => window.removeEventListener('storage', handleStorageChange);
+    }
   }, [token]);
 
   if (loading) return <div className="p-5 text-center">Loading menu...</div>;
