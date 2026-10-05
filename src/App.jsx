@@ -19,7 +19,7 @@ import MenuPreview from './pages/MenuPreview';
 // Super Admin Pages
 import AdminDashboard from './pages/admin/AdminDashboard';
 import CreateQR from './pages/admin/CreateQR';
-import ListQR from './pages/admin/ListQR';
+import CreateQRPersonal from './pages/admin/CreateQRPersonal';
 import Profile from './pages/Profile';
 
 import './css/index.css';
@@ -51,7 +51,7 @@ function App() {
         <Route path="/admin" element={<AdminLayout />}>
           <Route index element={<AdminDashboard />} />
           <Route path="create-qr" element={<CreateQR />} />
-          <Route path="list-qr" element={<ListQR />} />
+          <Route path="create-qr-personal" element={<CreateQRPersonal />} />
           <Route path="profile" element={<Profile />} />
         </Route>
       </Routes>

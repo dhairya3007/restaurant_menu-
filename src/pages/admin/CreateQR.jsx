@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { X, QrCode, Download, Edit, Trash2, Plus, Copy } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { X, QrCode, Download, Edit, Trash2, Plus, Copy, ExternalLink, ToggleRight, ToggleLeft } from 'lucide-react';
 import { fakeBackend } from '../../js/fakebackend';
 
 const CreateQR = () => {
@@ -9,10 +10,11 @@ const CreateQR = () => {
   const [loading, setLoading] = useState(false);
   const [viewQR, setViewQR] = useState(null);
   const [isEdit, setIsEdit] = useState(false);
+  const navigate = useNavigate();
 
   useEffect(() => {
     fetchClients();
-    
+
     const handleStorageChange = (e) => {
       if (e.key === 'restaurant_db_clients') {
         fetchClients();
@@ -60,6 +62,24 @@ const CreateQR = () => {
     }
   };
 
+  const handleToggleStatus = async (id) => {
+    await fakeBackend.toggleClientServiceSuspension(id);
+    fetchClients();
+  };
+
+  const handleAdminAutoLogin = (client) => {
+    const user = {
+      id: client.id,
+      email: client.email,
+      role: 'client',
+      name: client.name,
+      qrToken: client.qrToken,
+      theme: client.theme
+    };
+    localStorage.setItem('auth_user', JSON.stringify(user));
+    navigate('/dashboard');
+  };
+
   const openModalForNew = () => {
     setIsEdit(false);
     setNewClient({ name: '', email: '', password: '', plan: 'Basic Plan', planDuration: 1 });
@@ -103,49 +123,82 @@ const CreateQR = () => {
 
       {/* Table Area */}
       <div className="card shadow-sm border-0 rounded-4 p-4 mt-2">
-        <div className="table-responsive">
-          <table className="table table-hover align-middle">
-            <thead className="table-light text-muted">
+        <div className="table-responsive" style={{ maxHeight: '550px', overflowY: 'auto' }}>
+          <table className="table table-hover align-middle mb-0">
+            <thead className="table-light text-muted position-sticky top-0" style={{ zIndex: 2 }}>
               <tr>
-                <th className="py-3 border-0">S.No.</th>
-                <th className="py-3 border-0">CUSTOMER NAME</th>
-                <th className="py-3 border-0">EMAIL</th>
-                <th className="py-3 border-0">PLAN</th>
-                <th className="py-3 border-0">CREATED AT</th>
-                <th className="py-3 border-0">EXPIRE AT</th>
-                <th className="py-3 border-0">QR CODE</th>
-                <th className="py-3 border-0">ACTION</th>
+                <th className="py-3 border-0 bg-light">S.No.</th>
+                <th className="py-3 border-0 bg-light">CUSTOMER INFO</th>
+                <th className="py-3 border-0 bg-light">CREDENTIALS</th>
+                <th className="py-3 border-0 bg-light">QR & LINKS</th>
+                <th className="py-3 border-0 bg-light">LOGIN</th>
+                <th className="py-3 border-0 bg-light">STATUS</th>
+                <th className="py-3 border-0 bg-light">ACTION</th>
               </tr>
             </thead>
             <tbody>
               {clients.map((client, index) => (
                 <tr key={client.id}>
                   <td className="py-3 border-0 text-muted">{index + 1}</td>
-                  <td className="py-3 text-primary fw-bold border-0">{client.name}</td>
-                  <td className="py-3 text-dark border-0">{client.email || <span className="text-muted">Not provided</span>}</td>
-                  <td className="py-3 text-dark border-0">{client.plan}</td>
-                  <td className="py-3 text-dark border-0">{client.createdAt ? new Date(client.createdAt).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) : <span className="text-muted">N/A</span>}</td>
-                  <td className="py-3 text-dark border-0">{client.expireAt ? new Date(client.expireAt).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) : <span className="text-muted">N/A</span>}</td>
+
                   <td className="py-3 border-0">
-                    <div className="d-flex align-items-center gap-2">
-                      <button 
-                        onClick={() => setViewQR(client)}
-                        className="btn btn-sm btn-light border-0 d-flex align-items-center gap-1 text-primary fw-bold"
-                      >
-                        <QrCode size={16} /> View QR
-                      </button>
-                      <button
-                        onClick={() => {
-                          navigator.clipboard.writeText(window.location.origin + '/menu/' + client.qrToken);
-                          alert('Menu link copied to clipboard!');
-                        }}
-                        className="btn btn-sm btn-light border-0 text-secondary"
-                        title="Copy Menu Link"
-                      >
-                        <Copy size={16} />
-                      </button>
+                    <div className="fw-bold text-primary">{client.name}</div>
+                    <div className="text-muted small">
+                      {client.plan}<br />
+                      <strong>Created:</strong> {client.createdAt ? new Date(client.createdAt).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) : 'N/A'} <br />
+                      <strong>Expires:</strong> {client.expireAt ? new Date(client.expireAt).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) : 'N/A'}
                     </div>
                   </td>
+
+                  <td className="py-3 border-0 text-dark">
+                    <button
+                      className={`btn btn-sm border-0 fw-bold px-3 py-2 rounded-pill ${client.email ? 'bg-light text-muted' : 'text-primary bg-primary bg-opacity-10'}`}
+                      onClick={() => {
+                        navigator.clipboard.writeText(`${window.location.origin}/setup/${client.qrToken}`);
+                        alert('Setup link copied! Send this to the client.');
+                      }}
+                      disabled={!!client.email}
+                      title={client.email ? "Setup is already completed" : "Copy Setup Link"}
+                    >
+                      Copy Setup Link
+                    </button>
+                  </td>
+
+                  <td className="py-3 border-0">
+                    {client.isSetupComplete ? (
+                      <div className="d-flex align-items-center gap-2">
+                        <button 
+                          onClick={() => setViewQR(client)}
+                          className="btn btn-sm btn-light border-0 text-primary fw-bold"
+                          title="View & Download QR"
+                        >
+                          <QrCode size={16} /> QR
+                        </button>
+                        <a href={`/menu/${client.qrToken}`} target="_blank" rel="noreferrer" className="btn btn-sm btn-light border-0 text-secondary fw-bold d-flex align-items-center gap-1" title="View Public Menu">
+                          <ExternalLink size={16} /> Menu
+                        </a>
+                      </div>
+                    ) : (
+                      <span className="text-muted small fst-italic">Awaiting Setup...</span>
+                    )}
+                  </td>
+
+                  <td className="py-3 border-0">
+                    <button
+                      onClick={() => handleAdminAutoLogin(client)}
+                      className="btn text-white px-3 py-1 border-0 shadow-sm"
+                      style={{ backgroundColor: '#5e35b1', fontSize: '12px', borderRadius: '4px', fontWeight: 'bold' }}
+                    >
+                      Login
+                    </button>
+                  </td>
+
+                  <td className="py-3 border-0">
+                    <button onClick={() => handleToggleStatus(client.id)} className="btn btn-link p-0 text-decoration-none shadow-none border-0" title={client.isServiceSuspended ? "Activate Client" : "Deactivate Client"}>
+                      {!client.isServiceSuspended ? <ToggleRight size={26} className="text-primary" /> : <ToggleLeft size={26} className="text-muted" />}
+                    </button>
+                  </td>
+
                   <td className="py-3 border-0">
                     <button className="btn btn-sm text-muted px-2" onClick={() => openModalForEdit(client)}><Edit size={16} /></button>
                     <button className="btn btn-sm text-danger px-2" onClick={() => handleDeleteClient(client.id)}><Trash2 size={16} /></button>
@@ -177,11 +230,11 @@ const CreateQR = () => {
                   <div className="row g-3 mb-4">
                     <div className="col-md-6">
                       <label className="form-label text-muted small fw-bold">Customer Business Name</label>
-                      <input type="text" className="form-control bg-light border-0" value={newClient.name} onChange={(e) => setNewClient({...newClient, name: e.target.value})} />
+                      <input type="text" className="form-control bg-light border-0" value={newClient.name} onChange={(e) => setNewClient({ ...newClient, name: e.target.value })} />
                     </div>
                     <div className="col-md-6">
                       <label className="form-label text-muted small fw-bold">Plan name</label>
-                      <select className="form-select bg-light border-0" value={newClient.plan} onChange={(e) => setNewClient({...newClient, plan: e.target.value})}>
+                      <select className="form-select bg-light border-0" value={newClient.plan} onChange={(e) => setNewClient({ ...newClient, plan: e.target.value })}>
                         <option value="Basic Plan">Basic Plan (₹800/month)</option>
                         <option value="Premium Plan">Premium Plan (₹1200/month)</option>
                       </select>
@@ -191,7 +244,7 @@ const CreateQR = () => {
                   <div className="row g-3 mb-4">
                     <div className="col-md-6">
                       <label className="form-label text-muted small fw-bold">Plan Validation (Months)</label>
-                      <input type="number" min="1" className="form-control bg-light border-0" value={newClient.planDuration} onChange={(e) => setNewClient({...newClient, planDuration: parseInt(e.target.value) || ''})} />
+                      <input type="number" min="1" className="form-control bg-light border-0" value={newClient.planDuration} onChange={(e) => setNewClient({ ...newClient, planDuration: parseInt(e.target.value) || '' })} />
                     </div>
                     <div className="col-md-6">
                       <label className="form-label text-muted small fw-bold">Total Amount (₹)</label>
@@ -202,11 +255,11 @@ const CreateQR = () => {
                   <div className="row g-3 mb-4">
                     <div className="col-md-6">
                       <label className="form-label text-muted small fw-bold">Client Email (Optional - setup later)</label>
-                      <input type="email" className="form-control bg-light border-0" value={newClient.email} onChange={(e) => setNewClient({...newClient, email: e.target.value})} />
+                      <input type="email" className="form-control bg-light border-0" value={newClient.email} onChange={(e) => setNewClient({ ...newClient, email: e.target.value })} />
                     </div>
                     <div className="col-md-6">
                       <label className="form-label text-muted small fw-bold">Client Password (Optional - setup later)</label>
-                      <input type="text" className="form-control bg-light border-0" value={newClient.password} onChange={(e) => setNewClient({...newClient, password: e.target.value})} />
+                      <input type="text" className="form-control bg-light border-0" value={newClient.password} onChange={(e) => setNewClient({ ...newClient, password: e.target.value })} />
                     </div>
                   </div>
 
@@ -233,14 +286,14 @@ const CreateQR = () => {
               </div>
               <div className="modal-body p-4 text-center">
                 <div className="bg-light p-3 rounded-4 mb-4 d-inline-block">
-                  <img 
-                    src={`https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(window.location.origin + '/menu/' + viewQR.qrToken)}`} 
-                    alt="QR Code" 
-                    className="img-fluid rounded" 
+                  <img
+                    src={`https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(window.location.origin + '/menu/' + viewQR.qrToken)}`}
+                    alt="QR Code"
+                    className="img-fluid rounded"
                     style={{ width: '200px', height: '200px' }}
                   />
                 </div>
-                <button 
+                <button
                   onClick={handleDownloadQR}
                   className="btn text-white w-100 fw-bold py-2 d-flex justify-content-center align-items-center gap-2"
                   style={{ backgroundColor: '#5e35b1', borderRadius: '8px' }}

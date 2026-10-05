@@ -25,6 +25,13 @@ const Dashboard = () => {
 
   const user = auth.getCurrentUser();
   const [currentTheme, setCurrentTheme] = useState(user?.theme || 'modern');
+  const [previewTheme, setPreviewTheme] = useState(user?.theme || 'modern');
+  const [themeUpdated, setThemeUpdated] = useState(user?.themeUpdated || false);
+
+  const openThemeModal = () => {
+    setPreviewTheme(currentTheme);
+    setShowThemeModal(true);
+  };
 
   useEffect(() => {
     fetchData();
@@ -58,6 +65,30 @@ const Dashboard = () => {
         setNewDish(prev => ({ ...prev, categoryId: cats[0].id }));
       }
     }
+  };
+
+  // Progression Logic
+  const localSetupComplete = !!business.name && stats.categories > 0 && stats.dishes > 0 && themeUpdated;
+  const isFullySetup = user?.isSetupComplete || localSetupComplete;
+
+  useEffect(() => {
+    if (isFullySetup && !user?.isSetupComplete && user?.id) {
+      fakeBackend.markSetupComplete(user.id);
+      const updatedUser = { ...user, isSetupComplete: true };
+      localStorage.setItem('auth_user', JSON.stringify(updatedUser));
+    }
+  }, [isFullySetup]);
+
+  const isStep1Done = isFullySetup || !!business.name;
+  const isStep2Done = isFullySetup || (isStep1Done && stats.categories > 0);
+  const isStep3Done = isFullySetup || (isStep2Done && stats.dishes > 0);
+
+  const getCardProps = (isLocked, onClickFn) => {
+    const baseClass = "card shadow-sm border-0 h-100 p-3 rounded-3";
+    if (isLocked) {
+      return { className: baseClass, style: { opacity: 0.5, cursor: 'not-allowed', filter: 'grayscale(100%)' }, onClick: () => alert('Please complete the previous step first!') };
+    }
+    return { className: `${baseClass} hover-bg-light`, style: { cursor: 'pointer', transition: 'all 0.2s' }, onClick: onClickFn };
   };
 
   // --- BUSINESS LOGIC ---
@@ -162,8 +193,11 @@ const Dashboard = () => {
     if (user?.id) {
       setCurrentTheme(themeId);
       await fakeBackend.updateClientTheme(user.id, themeId);
-      user.theme = themeId;
-      localStorage.setItem('auth_user', JSON.stringify(user));
+      
+      const updatedUser = { ...user, theme: themeId, themeUpdated: true };
+      localStorage.setItem('auth_user', JSON.stringify(updatedUser));
+      setThemeUpdated(true);
+      
       setShowThemeModal(false);
     }
   };
@@ -177,7 +211,7 @@ const Dashboard = () => {
       {/* Cards Layout */}
       <div className="row g-3 mb-4">
         <div className="col-md-3">
-          <div className="card shadow-sm border-0 h-100 p-3 rounded-3 cursor-pointer" onClick={() => setShowBusinessModal(true)} style={{ cursor: 'pointer' }}>
+          <div {...getCardProps(false, () => setShowBusinessModal(true))}>
             <div className="d-flex justify-content-between align-items-center">
               <span className="fw-bold d-flex align-items-center gap-2"><Store size={18} className="text-primary" /> Business Profile</span>
               <ExternalLink size={16} className="text-muted" />
@@ -187,7 +221,7 @@ const Dashboard = () => {
         </div>
 
         <div className="col-md-3">
-          <div className="card shadow-sm border-0 h-100 p-3 rounded-3 cursor-pointer" onClick={() => setShowCategoryModal(true)} style={{ cursor: 'pointer' }}>
+          <div {...getCardProps(!isStep1Done, () => setShowCategoryModal(true))}>
             <div className="d-flex justify-content-between align-items-center">
               <span className="fw-bold d-flex align-items-center gap-2"><Layers size={18} className="text-primary" /> Manage Categories</span>
               <Plus size={16} className="text-muted" />
@@ -197,7 +231,7 @@ const Dashboard = () => {
         </div>
 
         <div className="col-md-3">
-          <div className="card shadow-sm border-0 h-100 p-3 rounded-3 cursor-pointer" onClick={() => setShowDishModal(true)} style={{ cursor: 'pointer' }}>
+          <div {...getCardProps(!isStep2Done, () => setShowDishModal(true))}>
             <div className="d-flex justify-content-between align-items-center">
               <span className="fw-bold d-flex align-items-center gap-2"><Utensils size={18} className="text-primary" /> Add Dishes (Items)</span>
               <Plus size={16} className="text-muted" />
@@ -207,27 +241,29 @@ const Dashboard = () => {
         </div>
 
         <div className="col-md-3">
-          <div className="card shadow-sm border-0 h-100 p-3 rounded-3 cursor-pointer" onClick={() => setShowThemeModal(true)} style={{ cursor: 'pointer' }}>
+          <div {...getCardProps(!isStep3Done, openThemeModal)}>
             <div className="d-flex justify-content-between align-items-center">
               <span className="fw-bold d-flex align-items-center gap-2"><Palette size={18} className="text-primary" /> Update Theme</span>
             </div>
-            <small className="text-muted mt-1 d-block">Theme: {currentTheme}</small>
+            <small className="text-muted mt-1 d-block">Theme: {currentTheme} (Step-4)</small>
           </div>
         </div>
 
         <div className="col-md-3">
-          <a href={`/menu/${user?.qrToken}`} target="_blank" rel="noreferrer" className="text-decoration-none">
-            <div className="card shadow-sm border-0 h-100 p-3 rounded-3 text-dark">
-              <div className="d-flex justify-content-between align-items-center">
-                <span className="fw-bold d-flex align-items-center gap-2"><ExternalLink size={18} className="text-primary" /> View Public Menu</span>
-                <ExternalLink size={16} className="text-muted" />
-              </div>
+          <div 
+            onClick={isFullySetup ? () => window.open(`/menu/${user?.qrToken}`, '_blank') : () => alert('Please complete the setup steps first!')}
+            className="card shadow-sm border-0 h-100 p-3 rounded-3 text-dark"
+            style={{ cursor: isFullySetup ? 'pointer' : 'not-allowed', opacity: isFullySetup ? 1 : 0.5, filter: isFullySetup ? 'none' : 'grayscale(100%)' }}
+          >
+            <div className="d-flex justify-content-between align-items-center">
+              <span className="fw-bold d-flex align-items-center gap-2"><ExternalLink size={18} className="text-primary" /> View Public Menu</span>
+              <ExternalLink size={16} className="text-muted" />
             </div>
-          </a>
+          </div>
         </div>
 
         <div className="col-md-3">
-          <div className="card shadow-sm border-0 h-100 p-3 rounded-3 cursor-pointer" onClick={() => setShowQrModal(true)} style={{ cursor: 'pointer' }}>
+          <div {...getCardProps(!isFullySetup, () => setShowQrModal(true))}>
             <div className="d-flex justify-content-between align-items-center">
               <span className="fw-bold d-flex align-items-center gap-2"><QrCode size={18} className="text-primary" /> View / Download QR</span>
               <Download size={16} className="text-muted" />
@@ -236,7 +272,7 @@ const Dashboard = () => {
         </div>
 
         <div className="col-md-3">
-          <div className="card shadow-sm border-0 h-100 p-3 rounded-3">
+          <div className="card shadow-sm border-0 h-100 p-3 rounded-3" style={{ opacity: isFullySetup ? 1 : 0.5 }}>
             <div className="d-flex justify-content-between align-items-center">
               <span className="fw-bold d-flex align-items-center gap-2">View / Scan Count</span>
               <span className="fw-bold text-dark fs-5">{stats.scanCount}</span>
@@ -245,7 +281,11 @@ const Dashboard = () => {
         </div>
 
         <div className="col-md-3">
-          <div className="card shadow-sm border-0 h-100 p-3 rounded-3" onClick={isServiceSuspended ? null : handleToggleStatus} style={{ cursor: isServiceSuspended ? 'not-allowed' : 'pointer', opacity: isServiceSuspended ? 0.6 : 1 }}>
+          <div 
+            className="card shadow-sm border-0 h-100 p-3 rounded-3" 
+            onClick={(!isFullySetup || isServiceSuspended) ? () => alert(isServiceSuspended ? 'Suspended by admin' : 'Finish setup first!') : handleToggleStatus} 
+            style={{ cursor: (!isFullySetup || isServiceSuspended) ? 'not-allowed' : 'pointer', opacity: (!isFullySetup || isServiceSuspended) ? 0.5 : 1 }}
+          >
             <div className="d-flex flex-column justify-content-center h-100">
               <div className="d-flex justify-content-between align-items-center">
                 <span className="fw-bold d-flex align-items-center gap-2">Activate / Deactivate</span>
@@ -461,29 +501,88 @@ const Dashboard = () => {
         <>
           <div className="modal-backdrop fade show" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}></div>
           <div className="modal d-block" tabIndex="-1" style={{ zIndex: 1055 }}>
-            <div className="modal-dialog modal-dialog-centered modal-lg">
+            <div className="modal-dialog modal-dialog-centered modal-xl">
               <div className="modal-content border-0 shadow-lg rounded-4">
                 <div className="modal-header border-bottom-0 pb-0 pt-4 px-4">
                   <h5 className="modal-title fw-bold">Select Menu Theme</h5>
                   <button type="button" className="btn-close" onClick={() => setShowThemeModal(false)}></button>
                 </div>
                 <div className="modal-body p-4">
-                  <div className="row g-3">
-                    {[{ id: 'modern', name: 'Modern Dark' }, { id: 'classic', name: 'Classic Elegance' }, { id: 'light', name: 'Light & Clean' }].map(t => (
-                      <div key={t.id} className="col-md-4">
-                        <div
-                          className="card border p-3 rounded-4 h-100 text-center"
-                          style={{ cursor: 'pointer', borderColor: currentTheme === t.id ? '#5e35b1' : '#e0e0e0', borderWidth: currentTheme === t.id ? '2px' : '1px' }}
-                          onClick={() => handleUpdateTheme(t.id)}
-                        >
-                          <h6 className="fw-bold">{t.name}</h6>
-                          {currentTheme === t.id && <div className="mt-2 text-primary"><Check size={20} className="mx-auto" /></div>}
+                  <div className="row g-4">
+                    <div className="col-md-4">
+                      <h6 className="fw-bold text-muted mb-3">Choose a style</h6>
+                      <select 
+                         className="form-select form-select-lg rounded-3 shadow-sm" 
+                         value={previewTheme} 
+                         onChange={(e) => setPreviewTheme(e.target.value)}
+                         style={{ borderColor: '#e0e0e0', cursor: 'pointer' }}
+                      >
+                         <option value="modern">Modern Dark</option>
+                         <option value="classic">Classic Elegance</option>
+                         <option value="light">Light & Clean</option>
+                      </select>
+                      <p className="text-muted small mt-3">Select a theme from the dropdown to update the live preview.</p>
+                    </div>
+                    
+                    <div className="col-md-8 d-flex flex-column align-items-center">
+                      <h6 className="fw-bold text-muted mb-3 text-center">Live Mobile Preview</h6>
+                      
+                      {/* Mobile Phone Mockup Container */}
+                      <div className="shadow-lg position-relative" style={{ width: '350px', height: '650px', borderRadius: '40px', padding: '10px', backgroundColor: '#222' }}>
+                        {/* Notch */}
+                        <div style={{ position: 'absolute', top: '10px', left: '50%', transform: 'translateX(-50%)', width: '120px', height: '25px', backgroundColor: '#222', borderBottomLeftRadius: '15px', borderBottomRightRadius: '15px', zIndex: 10 }}></div>
+                        
+                        {/* Actual Screen Content */}
+                        <div className={`theme-${previewTheme} h-100 w-100 overflow-hidden position-relative`} style={{ borderRadius: '30px', backgroundColor: 'var(--bg-color)', color: 'var(--text-color)', fontFamily: 'var(--font-family, inherit)' }}>
+                          <div style={{ height: '100%', overflowY: 'auto' }} className="hide-scrollbar">
+                            <div className="menu-header shadow-sm text-center py-5" style={{ background: 'linear-gradient(135deg, var(--primary-color), var(--secondary-color))', color: 'white', borderRadius: '0 0 50% 50% / 20px', paddingTop: '3rem !important' }}>
+                              <h4 className="fw-bold m-0 mt-3">{business.name || 'Restaurant Name'}</h4>
+                            </div>
+                            <div className="p-3 pb-5">
+                              {categories.length === 0 ? (
+                                <p className="text-center mt-4">Add categories and dishes to see them here.</p>
+                              ) : (
+                                categories.map(category => {
+                                  const categoryDishes = dishes.filter(d => d.categoryId === category.id && d.isActive !== false);
+                                  if (categoryDishes.length === 0) return null;
+                                  return (
+                                    <div key={category.id} className="mb-4">
+                                      <div className="text-center">
+                                        <h5 className="menu-category-title fw-bold fs-6" style={{ borderBottom: '2px solid var(--primary-color)', display: 'inline-block', marginBottom: '1rem', paddingBottom: '0.3rem' }}>
+                                          {category.name}
+                                        </h5>
+                                      </div>
+                                      <div className="d-flex flex-column gap-3">
+                                        {categoryDishes.map(dish => (
+                                          <div key={dish.id} className="glass-card p-3" style={{ background: 'var(--card-bg)', border: '1px solid rgba(255,255,255,0.18)', borderRadius: '12px' }}>
+                                            {dish.image && (
+                                              <img src={dish.image} alt={dish.name} className="dish-image rounded mb-2 w-100" style={{ height: '120px', objectFit: 'cover' }} />
+                                            )}
+                                            <div className="d-flex justify-content-between align-items-start">
+                                              <h6 className="fw-bold m-0 d-flex align-items-center gap-2" style={{ fontSize: '0.95rem' }}>
+                                                <span className={dish.type === 'Non-Veg' ? 'non-veg-icon' : 'veg-icon'} style={{ transform: 'scale(0.8)' }}></span>
+                                                {dish.name}
+                                              </h6>
+                                              <span className="fw-bold" style={{ color: 'var(--primary-color)' }}>₹{dish.price}</span>
+                                            </div>
+                                            {dish.quantity && <p className="text-muted mb-0 mt-1 small" style={{ fontSize: '0.8rem' }}>{dish.quantity}</p>}
+                                          </div>
+                                        ))}
+                                      </div>
+                                    </div>
+                                  );
+                                })
+                              )}
+                            </div>
+                          </div>
                         </div>
                       </div>
-                    ))}
+                    </div>
                   </div>
-                  <div className="d-flex justify-content-end gap-2 mt-4">
-                    <button type="button" className="btn btn-light bg-white border" onClick={() => setShowThemeModal(false)}>Close</button>
+                  
+                  <div className="d-flex justify-content-end gap-2 mt-4 pt-3 border-top">
+                    <button type="button" className="btn btn-light bg-white border" onClick={() => setShowThemeModal(false)}>Cancel</button>
+                    <button type="button" className="btn text-white px-4" style={{ backgroundColor: '#5e35b1' }} onClick={() => handleUpdateTheme(previewTheme)}>Save Theme</button>
                   </div>
                 </div>
               </div>

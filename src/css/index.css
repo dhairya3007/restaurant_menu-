@@ -10,7 +10,7 @@
   --sidebar-text: #f9fafb;
 }
 
-body.theme-classic {
+body.theme-classic, .theme-classic {
   --primary-color: #8b5a2b;
   --secondary-color: #d2b48c;
   --bg-color: #fff8dc;
@@ -21,13 +21,24 @@ body.theme-classic {
   font-family: 'Merriweather', serif;
 }
 
-body.theme-modern {
+body.theme-modern, .theme-modern {
   --primary-color: #ec4899;
   --secondary-color: #f472b6;
   --bg-color: #111827;
   --text-color: #f3f4f6;
   --card-bg: rgba(31, 41, 55, 0.7);
   --sidebar-bg: #000000;
+  --sidebar-text: #ffffff;
+  font-family: 'Inter', sans-serif;
+}
+
+body.theme-light, .theme-light {
+  --primary-color: #3b82f6;
+  --secondary-color: #93c5fd;
+  --bg-color: #ffffff;
+  --text-color: #1f2937;
+  --card-bg: #f3f4f6;
+  --sidebar-bg: #1e3a8a;
   --sidebar-text: #ffffff;
   font-family: 'Inter', sans-serif;
 }

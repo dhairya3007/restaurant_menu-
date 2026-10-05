@@ -53,10 +53,10 @@ const AdminSidebar = ({ isHovered, setIsHovered }) => {
           {isQrMenuOpen && isHovered && (
             <div className="d-flex flex-column mt-1" style={{ marginLeft: '1.5rem', borderLeft: '2px solid #e2e8f0', paddingLeft: '0.5rem' }}>
               <NavLink to="/admin/create-qr" className={({ isActive }) => `rounded px-3 py-2 mb-1 text-decoration-none d-block fs-6 ${isActive ? 'bg-primary text-white fw-bold shadow-sm' : 'text-dark hover-bg-light'}`} style={{ transition: 'all 0.2s ease', whiteSpace: 'nowrap' }}>
-                Create QR / Website
+                Create QR / RESTAURANT MENU
               </NavLink>
-              <NavLink to="/admin/list-qr" className={({ isActive }) => `rounded px-3 py-2 mb-1 text-decoration-none d-block fs-6 ${isActive ? 'bg-primary text-white fw-bold shadow-sm' : 'text-dark hover-bg-light'}`} style={{ transition: 'all 0.2s ease', whiteSpace: 'nowrap' }}>
-                List QR / Website
+              <NavLink to="/admin/create-qr-personal" className={({ isActive }) => `rounded px-3 py-2 mb-1 text-decoration-none d-block fs-6 ${isActive ? 'bg-primary text-white fw-bold shadow-sm' : 'text-dark hover-bg-light'}`} style={{ transition: 'all 0.2s ease', whiteSpace: 'nowrap' }}>
+                Create QR / Personal
               </NavLink>
             </div>
           )}

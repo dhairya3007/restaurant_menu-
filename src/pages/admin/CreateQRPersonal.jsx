@@ -3,7 +3,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import { fakeBackend } from '../../js/fakebackend';
 import { Plus, Edit, ExternalLink, QrCode, Download, Trash2, ToggleRight, ToggleLeft } from 'lucide-react';
 
-const ListQR = () => {
+const CreateQRPersonal = () => {
   const [clients, setClients] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [editClient, setEditClient] = useState(null);
@@ -257,4 +257,4 @@ const ListQR = () => {
   );
 };
 
-export default ListQR;
+export default CreateQRPersonal;

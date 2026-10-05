@@ -22,11 +22,11 @@ const initializeDB = () => {
       qrToken: 'demo-pizza-token',
       theme: 'modern',
       createdAt: new Date().toISOString(),
-      expireAt: new Date(new Date().setFullYear(new Date().getFullYear() + 1)).toISOString(),
       businessDetails: { name: 'The Pizza House', phone: '+1 234 567 8900', address: '123 Pizza Street, Food City', logo: '' },
       isActive: true,
       isServiceSuspended: false,
-      scanCount: 0
+      scanCount: 0,
+      themeUpdated: true
     },
     {
       id: 'client-2',
@@ -38,11 +38,11 @@ const initializeDB = () => {
       qrToken: 'demo-burger-token',
       theme: 'classic',
       createdAt: new Date().toISOString(),
-      expireAt: new Date(new Date().setMonth(new Date().getMonth() + 6)).toISOString(),
       businessDetails: { name: 'Burger Queen', phone: '+1 987 654 3210', address: '456 Burger Avenue, Food City', logo: '' },
       isActive: true,
       isServiceSuspended: false,
-      scanCount: 0
+      scanCount: 0,
+      themeUpdated: true
     }
   ];
 
@@ -75,7 +75,35 @@ export const fakeBackend = {
   // --- ADMIN METHODS (Manage Clients) ---
   getClients: async () => {
     await wait(DELAY);
-    return JSON.parse(localStorage.getItem('restaurant_db_clients') || '[]');
+    const clients = JSON.parse(localStorage.getItem('restaurant_db_clients') || '[]');
+    const categories = JSON.parse(localStorage.getItem('restaurant_db_categories') || '[]');
+    const dishes = JSON.parse(localStorage.getItem('restaurant_db_dishes') || '[]');
+    
+    let dbUpdated = false;
+    const updatedClients = clients.map(c => {
+      if (c.isSetupComplete) return c; // Once completed, never revert!
+
+      const hasBusiness = !!(c.businessDetails && c.businessDetails.name);
+      const clientCategoryIds = categories.filter(cat => cat.clientId === c.id).map(cat => cat.id);
+      const hasCategories = clientCategoryIds.length > 0;
+      const hasDishes = dishes.some(d => clientCategoryIds.includes(d.categoryId));
+      const hasTheme = c.themeUpdated === true;
+      
+      const isComplete = hasBusiness && hasCategories && hasDishes && hasTheme;
+      if (isComplete) {
+        c.isSetupComplete = true;
+        dbUpdated = true;
+      } else {
+        c.isSetupComplete = false;
+      }
+      return c;
+    });
+
+    if (dbUpdated) {
+      localStorage.setItem('restaurant_db_clients', JSON.stringify(updatedClients));
+    }
+    
+    return updatedClients;
   },
 
   createClient: async (clientData) => {
@@ -95,6 +123,7 @@ export const fakeBackend = {
       id: Date.now().toString(),
       qrToken: qrToken,
       theme: 'modern',
+      themeUpdated: false,
       createdAt: createdAt,
       expireAt: expireAt
     };
@@ -128,6 +157,15 @@ export const fakeBackend = {
     throw new Error('Client not found');
   },
 
+  markSetupComplete: async (clientId) => {
+    const clients = JSON.parse(localStorage.getItem('restaurant_db_clients') || '[]');
+    const index = clients.findIndex(c => c.id === clientId);
+    if (index > -1 && !clients[index].isSetupComplete) {
+      clients[index].isSetupComplete = true;
+      localStorage.setItem('restaurant_db_clients', JSON.stringify(clients));
+    }
+  },
+
   deleteClient: async (id) => {
     await wait(DELAY);
     const clients = JSON.parse(localStorage.getItem('restaurant_db_clients') || '[]');
@@ -142,6 +180,7 @@ export const fakeBackend = {
     const index = clients.findIndex(c => c.id === clientId);
     if (index > -1) {
       clients[index].theme = theme;
+      clients[index].themeUpdated = true;
       localStorage.setItem('restaurant_db_clients', JSON.stringify(clients));
       return clients[index];
     }
