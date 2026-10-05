@@ -25,6 +25,7 @@ const initializeDB = () => {
       expireAt: new Date(new Date().setFullYear(new Date().getFullYear() + 1)).toISOString(),
       businessDetails: { name: 'The Pizza House', phone: '+1 234 567 8900', address: '123 Pizza Street, Food City', logo: '' },
       isActive: true,
+      isServiceSuspended: false,
       scanCount: 0
     },
     {
@@ -40,6 +41,7 @@ const initializeDB = () => {
       expireAt: new Date(new Date().setMonth(new Date().getMonth() + 6)).toISOString(),
       businessDetails: { name: 'Burger Queen', phone: '+1 987 654 3210', address: '456 Burger Avenue, Food City', logo: '' },
       isActive: true,
+      isServiceSuspended: false,
       scanCount: 0
     }
   ];
@@ -182,7 +184,22 @@ export const fakeBackend = {
     await wait(DELAY);
     const clients = JSON.parse(localStorage.getItem('restaurant_db_clients') || '[]');
     const client = clients.find(c => c.id === clientId);
-    return client?.isActive === undefined ? true : client.isActive;
+    return { 
+      isActive: client?.isActive === undefined ? true : client.isActive,
+      isServiceSuspended: client?.isServiceSuspended || false 
+    };
+  },
+
+  toggleClientServiceSuspension: async (clientId) => {
+    await wait(DELAY);
+    const clients = JSON.parse(localStorage.getItem('restaurant_db_clients') || '[]');
+    const index = clients.findIndex(c => c.id === clientId);
+    if (index > -1) {
+      clients[index].isServiceSuspended = !clients[index].isServiceSuspended;
+      localStorage.setItem('restaurant_db_clients', JSON.stringify(clients));
+      return clients[index].isServiceSuspended;
+    }
+    throw new Error('Client not found');
   },
 
   getScanCount: async (clientId) => {
@@ -290,6 +307,7 @@ export const fakeBackend = {
     const client = clients.find(c => c.qrToken === qrToken);
 
     if (!client) throw new Error('Invalid QR Token');
+    if (client.isServiceSuspended === true) throw new Error('Service Suspended by Admin');
     if (client.isActive === false) throw new Error('This menu is currently deactivated by the restaurant owner.');
 
     const categories = await fakeBackend.getCategoriesByClientId(client.id);

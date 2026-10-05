@@ -47,7 +47,7 @@ const ListQR = () => {
   };
 
   const handleToggleStatus = async (id) => {
-    await fakeBackend.toggleClientStatus(id);
+    await fakeBackend.toggleClientServiceSuspension(id);
     fetchClients();
   };
 
@@ -151,8 +151,8 @@ const ListQR = () => {
                     </a>
                   </td>
                   <td className="py-3 border-0">
-                    <button onClick={() => handleToggleStatus(item.id)} className="btn btn-link p-0 text-decoration-none shadow-none border-0" title={item.isActive !== false ? "Deactivate Client" : "Activate Client"}>
-                      {item.isActive !== false ? <ToggleRight size={26} className="text-primary" /> : <ToggleLeft size={26} className="text-muted" />}
+                    <button onClick={() => handleToggleStatus(item.id)} className="btn btn-link p-0 text-decoration-none shadow-none border-0" title={item.isServiceSuspended ? "Activate Client" : "Deactivate Client"}>
+                      {!item.isServiceSuspended ? <ToggleRight size={26} className="text-primary" /> : <ToggleLeft size={26} className="text-muted" />}
                     </button>
                   </td>
                   <td className="py-3 border-0">

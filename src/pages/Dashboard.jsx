@@ -8,6 +8,7 @@ const Dashboard = () => {
   const [dishes, setDishes] = useState([]);
   const [categories, setCategories] = useState([]);
   const [isActive, setIsActive] = useState(true);
+  const [isServiceSuspended, setIsServiceSuspended] = useState(false);
 
   // Modals state
   const [showBusinessModal, setShowBusinessModal] = useState(false);
@@ -44,12 +45,13 @@ const Dashboard = () => {
       const d = await fakeBackend.getDishesByClientId(user.id);
       const bDetails = await fakeBackend.getBusinessDetails(user.id);
       const scans = await fakeBackend.getScanCount(user.id);
-      const activeStatus = await fakeBackend.getClientStatus(user.id);
+      const statusObj = await fakeBackend.getClientStatus(user.id);
 
       setCategories(cats);
       setStats({ categories: cats.length, dishes: d.length, scanCount: scans });
       setDishes(d);
-      setIsActive(activeStatus);
+      setIsActive(statusObj.isActive);
+      setIsServiceSuspended(statusObj.isServiceSuspended);
 
       if (bDetails.name) setBusiness(bDetails);
       if (cats.length > 0 && !newDish.categoryId) {
@@ -243,10 +245,13 @@ const Dashboard = () => {
         </div>
 
         <div className="col-md-3">
-          <div className="card shadow-sm border-0 h-100 p-3 rounded-3 cursor-pointer" onClick={handleToggleStatus} style={{ cursor: 'pointer' }}>
-            <div className="d-flex justify-content-between align-items-center">
-              <span className="fw-bold d-flex align-items-center gap-2">Activate / Deactivate</span>
-              {isActive ? <ToggleRight size={28} className="text-primary" /> : <ToggleLeft size={28} className="text-muted" />}
+          <div className="card shadow-sm border-0 h-100 p-3 rounded-3" onClick={isServiceSuspended ? null : handleToggleStatus} style={{ cursor: isServiceSuspended ? 'not-allowed' : 'pointer', opacity: isServiceSuspended ? 0.6 : 1 }}>
+            <div className="d-flex flex-column justify-content-center h-100">
+              <div className="d-flex justify-content-between align-items-center">
+                <span className="fw-bold d-flex align-items-center gap-2">Activate / Deactivate</span>
+                {isActive ? <ToggleRight size={28} className="text-primary" /> : <ToggleLeft size={28} className="text-muted" />}
+              </div>
+              {isServiceSuspended && <small className="text-danger mt-1 fw-bold">Service Suspended by Admin</small>}
             </div>
           </div>
         </div>
