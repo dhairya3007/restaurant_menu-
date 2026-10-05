@@ -27,6 +27,7 @@ const Dashboard = () => {
   const [currentTheme, setCurrentTheme] = useState(user?.theme || 'modern');
   const [previewTheme, setPreviewTheme] = useState(user?.theme || 'modern');
   const [themeUpdated, setThemeUpdated] = useState(user?.themeUpdated || false);
+  const [activeTabId, setActiveTabId] = useState(null);
 
   const openThemeModal = () => {
     setPreviewTheme(currentTheme);
@@ -251,7 +252,7 @@ const Dashboard = () => {
 
         <div className="col-md-3">
           <div 
-            onClick={isFullySetup ? () => window.open(`/menu/${user?.qrToken}`, '_blank') : () => alert('Please complete the setup steps first!')}
+            onClick={isFullySetup ? () => window.open(`/${user?.qrToken}`, '_blank') : () => alert('Please complete the setup steps first!')}
             className="card shadow-sm border-0 h-100 p-3 rounded-3 text-dark"
             style={{ cursor: isFullySetup ? 'pointer' : 'not-allowed', opacity: isFullySetup ? 1 : 0.5, filter: isFullySetup ? 'none' : 'grayscale(100%)' }}
           >
@@ -501,7 +502,7 @@ const Dashboard = () => {
         <>
           <div className="modal-backdrop fade show" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}></div>
           <div className="modal d-block" tabIndex="-1" style={{ zIndex: 1055 }}>
-            <div className="modal-dialog modal-dialog-centered modal-xl">
+            <div className="modal-dialog modal-dialog-centered modal-lg">
               <div className="modal-content border-0 shadow-lg rounded-4">
                 <div className="modal-header border-bottom-0 pb-0 pt-4 px-4">
                   <h5 className="modal-title fw-bold">Select Menu Theme</h5>
@@ -520,6 +521,13 @@ const Dashboard = () => {
                          <option value="modern">Modern Dark</option>
                          <option value="classic">Classic Elegance</option>
                          <option value="light">Light & Clean</option>
+                         <option value="neon">Cyberpunk Neon</option>
+                         <option value="nature">Organic Nature</option>
+                         <option value="compact">Compact List (Image Left)</option>
+                         <option value="elegant">Monochrome Minimalist</option>
+                         <option value="sunset">Sunset Gradient</option>
+                         <option value="retro">Retro Blocky</option>
+                         <option value="luxury">Luxury Navy & Gold</option>
                       </select>
                       <p className="text-muted small mt-3">Select a theme from the dropdown to update the live preview.</p>
                     </div>
@@ -527,51 +535,81 @@ const Dashboard = () => {
                     <div className="col-md-8 d-flex flex-column align-items-center">
                       <h6 className="fw-bold text-muted mb-3 text-center">Live Mobile Preview</h6>
                       
-                      {/* Mobile Phone Mockup Container */}
-                      <div className="shadow-lg position-relative" style={{ width: '350px', height: '650px', borderRadius: '40px', padding: '10px', backgroundColor: '#222' }}>
+                      {/* Mobile Phone Mockup Container - Scaled down for laptop screens */}
+                      <div className="shadow-lg position-relative" style={{ width: '280px', height: '480px', borderRadius: '35px', padding: '10px', backgroundColor: '#222', margin: '0 auto' }}>
                         {/* Notch */}
-                        <div style={{ position: 'absolute', top: '10px', left: '50%', transform: 'translateX(-50%)', width: '120px', height: '25px', backgroundColor: '#222', borderBottomLeftRadius: '15px', borderBottomRightRadius: '15px', zIndex: 10 }}></div>
+                        <div style={{ position: 'absolute', top: '10px', left: '50%', transform: 'translateX(-50%)', width: '90px', height: '20px', backgroundColor: '#222', borderBottomLeftRadius: '10px', borderBottomRightRadius: '10px', zIndex: 10 }}></div>
                         
                         {/* Actual Screen Content */}
-                        <div className={`theme-${previewTheme} h-100 w-100 overflow-hidden position-relative`} style={{ borderRadius: '30px', backgroundColor: 'var(--bg-color)', color: 'var(--text-color)', fontFamily: 'var(--font-family, inherit)' }}>
+                        <div className={`theme-${previewTheme} h-100 w-100 overflow-hidden position-relative`} style={{ borderRadius: '25px', backgroundColor: 'var(--bg-color)', color: 'var(--text-color)', fontFamily: 'var(--font-family, inherit)' }}>
                           <div style={{ height: '100%', overflowY: 'auto' }} className="hide-scrollbar">
-                            <div className="menu-header shadow-sm text-center py-5" style={{ background: 'linear-gradient(135deg, var(--primary-color), var(--secondary-color))', color: 'white', borderRadius: '0 0 50% 50% / 20px', paddingTop: '3rem !important' }}>
-                              <h4 className="fw-bold m-0 mt-3">{business.name || 'Restaurant Name'}</h4>
+                            <div className="menu-header shadow-sm text-center py-4" style={{ background: 'linear-gradient(135deg, var(--primary-color), var(--secondary-color))', color: 'white', borderRadius: '0 0 50% 50% / 15px', paddingTop: '2.5rem !important', marginBottom: '1.5rem' }}>
+                              <h5 className="fw-bold m-0 mt-2">{business.name || 'Restaurant Name'}</h5>
                             </div>
-                            <div className="p-3 pb-5">
+                            <div className="p-2 pb-4">
                               {categories.length === 0 ? (
                                 <p className="text-center mt-4">Add categories and dishes to see them here.</p>
                               ) : (
-                                categories.map(category => {
-                                  const categoryDishes = dishes.filter(d => d.categoryId === category.id && d.isActive !== false);
-                                  if (categoryDishes.length === 0) return null;
-                                  return (
-                                    <div key={category.id} className="mb-4">
-                                      <div className="text-center">
-                                        <h5 className="menu-category-title fw-bold fs-6" style={{ borderBottom: '2px solid var(--primary-color)', display: 'inline-block', marginBottom: '1rem', paddingBottom: '0.3rem' }}>
-                                          {category.name}
-                                        </h5>
-                                      </div>
-                                      <div className="d-flex flex-column gap-3">
-                                        {categoryDishes.map(dish => (
-                                          <div key={dish.id} className="glass-card p-3" style={{ background: 'var(--card-bg)', border: '1px solid rgba(255,255,255,0.18)', borderRadius: '12px' }}>
-                                            {dish.image && (
-                                              <img src={dish.image} alt={dish.name} className="dish-image rounded mb-2 w-100" style={{ height: '120px', objectFit: 'cover' }} />
-                                            )}
-                                            <div className="d-flex justify-content-between align-items-start">
-                                              <h6 className="fw-bold m-0 d-flex align-items-center gap-2" style={{ fontSize: '0.95rem' }}>
-                                                <span className={dish.type === 'Non-Veg' ? 'non-veg-icon' : 'veg-icon'} style={{ transform: 'scale(0.8)' }}></span>
-                                                {dish.name}
-                                              </h6>
-                                              <span className="fw-bold" style={{ color: 'var(--primary-color)' }}>₹{dish.price}</span>
-                                            </div>
-                                            {dish.quantity && <p className="text-muted mb-0 mt-1 small" style={{ fontSize: '0.8rem' }}>{dish.quantity}</p>}
-                                          </div>
-                                        ))}
-                                      </div>
+                                <>
+                                  {/* Render Tabs if theme is Luxury or Elegant */}
+                                  {(previewTheme === 'luxury' || previewTheme === 'elegant') && (
+                                    <div className="d-flex flex-wrap justify-content-center gap-2 mb-3 px-1">
+                                      {categories.map(cat => (
+                                        <button 
+                                          key={cat.id} 
+                                          onClick={() => setActiveTabId(cat.id)}
+                                          className="btn btn-sm rounded-pill px-3"
+                                          style={{ 
+                                            backgroundColor: (activeTabId || categories[0].id) === cat.id ? 'var(--primary-color)' : 'transparent',
+                                            color: (activeTabId || categories[0].id) === cat.id ? '#fff' : 'var(--text-color)',
+                                            border: '1px solid var(--primary-color)'
+                                          }}
+                                        >
+                                          {cat.name}
+                                        </button>
+                                      ))}
                                     </div>
-                                  );
-                                })
+                                  )}
+
+                                  {categories.filter(cat => (previewTheme === 'luxury' || previewTheme === 'elegant') ? cat.id === (activeTabId || categories[0].id) : true).map(category => {
+                                    const categoryDishes = dishes.filter(d => d.categoryId === category.id && d.isActive !== false);
+                                    if (categoryDishes.length === 0) return null;
+                                    
+                                    return (
+                                      <div key={category.id} className="mb-4">
+                                        {previewTheme !== 'luxury' && previewTheme !== 'elegant' && (
+                                          <div className="text-center">
+                                            <h5 className="menu-category-title fw-bold fs-6" style={{ borderBottom: '2px solid var(--primary-color)', display: 'inline-block', marginBottom: '1rem', paddingBottom: '0.3rem' }}>
+                                              {category.name}
+                                            </h5>
+                                          </div>
+                                        )}
+                                        
+                                        <div className="d-flex flex-column gap-2">
+                                          {categoryDishes.map(dish => (
+                                            <div key={dish.id} className="w-100">
+                                              <div className="glass-card dish-card p-2 w-100">
+                                                {dish.image && (
+                                                  <img src={dish.image} alt={dish.name} className="dish-image mb-2 w-100" style={{ height: '100px', objectFit: 'cover' }} />
+                                                )}
+                                                <div className="d-flex flex-column h-100 justify-content-center">
+                                                  <h6 className="fw-bold m-0 d-flex align-items-start gap-1" style={{ fontSize: '0.9rem' }}>
+                                                    <span className={dish.type === 'Non-Veg' ? 'non-veg-icon flex-shrink-0' : 'veg-icon flex-shrink-0'} style={{ marginTop: '3px', transform: 'scale(0.8)' }}></span>
+                                                    <span style={{ whiteSpace: 'normal', wordBreak: 'break-word' }}>{dish.name}</span>
+                                                  </h6>
+                                                  <div className="d-flex justify-content-between align-items-end mt-2">
+                                                    <p className="mb-0 small opacity-75 text-truncate pe-2" style={{ fontSize: '0.75rem' }}>{dish.quantity || ''}</p>
+                                                    <span className="fw-bold flex-shrink-0" style={{ color: 'var(--primary-color)', fontSize: '0.95rem' }}>₹{dish.price}</span>
+                                                  </div>
+                                                </div>
+                                              </div>
+                                            </div>
+                                          ))}
+                                        </div>
+                                      </div>
+                                    );
+                                  })}
+                                </>
                               )}
                             </div>
                           </div>
@@ -605,15 +643,15 @@ const Dashboard = () => {
                 <div className="modal-body p-4 text-center">
                   <div className="bg-light p-3 rounded-4 d-inline-block border mb-4">
                     <img 
-                      src={`https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(window.location.origin + '/menu/' + user?.qrToken)}`} 
+                      src={`https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(window.location.origin + '/' + user?.qrToken)}`} 
                       alt="QR Code" 
                       className="img-fluid rounded" 
                       style={{ width: '150px', height: '150px' }}
                     />
                   </div>
                   <p className="text-muted mb-2">Users can scan this to view your menu.</p>
-                  <a href={`/menu/${user?.qrToken}`} target="_blank" rel="noreferrer" className="form-control text-primary text-decoration-none fw-bold bg-light">
-                    {window.location.origin}/menu/{user?.qrToken}
+                  <a href={`/${user?.qrToken}`} target="_blank" rel="noreferrer" className="form-control text-primary text-decoration-none fw-bold bg-light">
+                    {window.location.origin}/{user?.qrToken}
                   </a>
                   <div className="d-flex justify-content-center gap-2 mt-4">
                     <button type="button" className="btn btn-primary px-4" style={{ backgroundColor: '#5e35b1' }} onClick={() => setShowQrModal(false)}>Done</button>

@@ -34,7 +34,6 @@ function App() {
         <Route element={<BlankLayout />}>
           <Route path="/login" element={<Login />} />
           <Route path="/setup/:token" element={<ClientSetup />} />
-          <Route path="/menu/:token" element={<MenuPreview />} />
         </Route>
 
         {/* Client Dashboard Routes */}
@@ -53,6 +52,11 @@ function App() {
           <Route path="create-qr" element={<CreateQR />} />
           <Route path="create-qr-personal" element={<CreateQRPersonal />} />
           <Route path="profile" element={<Profile />} />
+        </Route>
+
+        {/* Catch-all Public Route (MUST BE AT THE BOTTOM to prevent collisions) */}
+        <Route element={<BlankLayout />}>
+          <Route path="/:token" element={<MenuPreview />} />
         </Route>
       </Routes>
     </Router>

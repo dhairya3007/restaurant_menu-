@@ -54,7 +54,7 @@ const CreateQRPersonal = () => {
   const handleDownloadQR = async () => {
     if (!viewQR) return;
     try {
-      const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=500x500&data=${encodeURIComponent(window.location.origin + '/menu/' + viewQR.qrToken)}`;
+      const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=500x500&data=${encodeURIComponent(window.location.origin + '/' + viewQR.qrToken)}`;
       const response = await fetch(qrUrl);
       const blob = await response.blob();
       const url = window.URL.createObjectURL(blob);
@@ -146,7 +146,7 @@ const CreateQRPersonal = () => {
                     </button>
                   </td>
                   <td className="py-3 text-dark border-0">
-                    <a href={`/menu/${item.qrToken}`} target="_blank" rel="noreferrer" className="text-dark text-decoration-none hover-primary d-flex align-items-center gap-1">
+                    <a href={`/${item.qrToken}`} target="_blank" rel="noreferrer" className="text-dark text-decoration-none hover-primary d-flex align-items-center gap-1">
                       <ExternalLink size={18} className="text-primary" /> View
                     </a>
                   </td>
@@ -235,7 +235,7 @@ const CreateQRPersonal = () => {
               <div className="modal-body p-4 text-center">
                 <div className="bg-light p-3 rounded-4 mb-4 d-inline-block">
                   <img 
-                    src={`https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(window.location.origin + '/menu/' + viewQR.qrToken)}`} 
+                    src={`https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(window.location.origin + '/' + viewQR.qrToken)}`} 
                     alt="QR Code" 
                     className="img-fluid rounded" 
                     style={{ width: '200px', height: '200px' }}

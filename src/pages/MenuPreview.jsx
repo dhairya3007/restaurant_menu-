@@ -7,6 +7,7 @@ const MenuPreview = () => {
   const [data, setData] = useState({ client: null, categories: [], dishes: [] });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [activeTabId, setActiveTabId] = useState(null);
 
   useEffect(() => {
     const fetchMenu = async () => {
@@ -53,46 +54,70 @@ const MenuPreview = () => {
           <h1 className="fw-bold mb-0" style={{ fontSize: '2rem' }}>{client.name || 'Our Menu'}</h1>
         </div>
 
-        <div className="container-fluid mt-4 px-3">
+        <div className="container-fluid mt-4 px-3 pb-5">
           {categories.length === 0 && dishes.length === 0 ? (
             <div className="text-center mt-5 p-4 glass-card">
               <h3>Menu is empty.</h3>
             </div>
         ) : (
-          categories.map(category => {
-            const categoryDishes = dishes.filter(d => d.categoryId === category.id);
-            if (categoryDishes.length === 0) return null;
+          <>
+            {/* Render Tabs if theme is Luxury or Elegant */}
+            {(client?.theme === 'luxury' || client?.theme === 'elegant') && (
+              <div className="d-flex flex-wrap justify-content-center gap-2 mb-4 px-1">
+                {categories.map(cat => (
+                  <button 
+                    key={cat.id} 
+                    onClick={() => setActiveTabId(cat.id)}
+                    className="btn rounded-pill px-4 py-2 fw-bold"
+                    style={{ 
+                      backgroundColor: (activeTabId || categories[0].id) === cat.id ? 'var(--primary-color)' : 'transparent',
+                      color: (activeTabId || categories[0].id) === cat.id ? '#fff' : 'var(--text-color)',
+                      border: '2px solid var(--primary-color)'
+                    }}
+                  >
+                    {cat.name}
+                  </button>
+                ))}
+              </div>
+            )}
 
-            return (
-              <div key={category.id} className="mb-5">
-                <div className="text-center">
-                  <h2 className="menu-category-title fw-bold fs-3">{category.name}</h2>
-                </div>
-                
-                <div className="row g-3">
-                  {categoryDishes.map(dish => (
-                    <div key={dish.id} className="col-12">
-                      <div className="glass-card dish-card h-100">
-                        {dish.image && (
-                          <img src={dish.image} alt={dish.name} className="dish-image" />
-                        )}
-                        <div className="p-4">
-                          <div className="d-flex justify-content-between align-items-start mb-2">
-                            <h4 className="fw-bold mb-0 d-flex align-items-center">
-                              <span className={dish.type === 'Veg' ? 'veg-icon' : 'non-veg-icon'}></span>
-                              {dish.name}
+            {categories.filter(cat => (client?.theme === 'luxury' || client?.theme === 'elegant') ? cat.id === (activeTabId || categories[0].id) : true).map(category => {
+              const categoryDishes = dishes.filter(d => d.categoryId === category.id);
+              if (categoryDishes.length === 0) return null;
+
+              return (
+                <div key={category.id} className="mb-5">
+                  {client?.theme !== 'luxury' && client?.theme !== 'elegant' && (
+                    <div className="text-center">
+                      <h2 className="menu-category-title fw-bold fs-3">{category.name}</h2>
+                    </div>
+                  )}
+                  
+                  <div className="d-flex flex-column gap-4">
+                    {categoryDishes.map(dish => (
+                      <div key={dish.id} className="w-100">
+                        <div className="glass-card dish-card p-4 w-100">
+                          {dish.image && (
+                            <img src={dish.image} alt={dish.name} className="dish-image" />
+                          )}
+                          <div className="d-flex flex-column h-100 justify-content-center">
+                            <h4 className="fw-bold mb-0 d-flex align-items-start" style={{ fontSize: '1.2rem' }}>
+                              <span className={dish.type === 'Veg' ? 'veg-icon flex-shrink-0' : 'non-veg-icon flex-shrink-0'} style={{ marginTop: '5px' }}></span>
+                              <span style={{ whiteSpace: 'normal', wordBreak: 'break-word' }}>{dish.name}</span>
                             </h4>
-                            <span className="fw-bold fs-5 text-primary">₹{dish.price}</span>
+                            <div className="d-flex justify-content-between align-items-end mt-3">
+                              <p className="mb-0 opacity-75 text-truncate pe-3">{dish.quantity || ''}</p>
+                              <span className="fw-bold text-primary flex-shrink-0" style={{ fontSize: '1.3rem' }}>₹{dish.price}</span>
+                            </div>
                           </div>
-                          {dish.quantity && <p className="text-muted mb-0 mt-1">{dish.quantity}</p>}
                         </div>
                       </div>
-                    </div>
-                  ))}
+                    ))}
+                  </div>
                 </div>
-              </div>
-            );
-          })
+              );
+            })}
+          </>
         )}
         </div>
       </div>
