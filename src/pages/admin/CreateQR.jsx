@@ -187,7 +187,15 @@ const CreateQR = () => {
                     <button
                       onClick={() => handleAdminAutoLogin(client)}
                       className="btn text-white px-3 py-1 border-0 shadow-sm"
-                      style={{ backgroundColor: '#5e35b1', fontSize: '12px', borderRadius: '4px', fontWeight: 'bold' }}
+                      style={{ 
+                        backgroundColor: client.email ? '#5e35b1' : '#a7a7a7', 
+                        fontSize: '12px', 
+                        borderRadius: '4px', 
+                        fontWeight: 'bold',
+                        cursor: client.email ? 'pointer' : 'not-allowed'
+                      }}
+                      disabled={!client.email}
+                      title={client.email ? "Login as client" : "Awaiting client authentication"}
                     >
                       Login
                     </button>

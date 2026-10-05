@@ -140,7 +140,16 @@ const CreateQRPersonal = () => {
                     <button
                       onClick={() => handleAdminAutoLogin(item)}
                       className="btn text-white px-3 py-1 border-0"
-                      style={{ backgroundColor: '#5e35b1', fontSize: '13px', borderRadius: '4px', fontWeight: '500', minWidth: '90px' }}
+                      style={{ 
+                        backgroundColor: item.email ? '#5e35b1' : '#a7a7a7', 
+                        fontSize: '13px', 
+                        borderRadius: '4px', 
+                        fontWeight: '500', 
+                        minWidth: '90px',
+                        cursor: item.email ? 'pointer' : 'not-allowed'
+                      }}
+                      disabled={!item.email}
+                      title={item.email ? "Login as client" : "Awaiting client authentication"}
                     >
                       Login
                     </button>
