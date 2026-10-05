@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { fakeBackend } from '../../js/fakebackend';
-import { Plus, Edit, ExternalLink, QrCode, Download, Trash2 } from 'lucide-react';
+import { Plus, Edit, ExternalLink, QrCode, Download, Trash2, ToggleRight, ToggleLeft } from 'lucide-react';
 
 const ListQR = () => {
   const [clients, setClients] = useState([]);
@@ -44,6 +44,11 @@ const ListQR = () => {
       await fakeBackend.deleteClient(id);
       await fetchClients();
     }
+  };
+
+  const handleToggleStatus = async (id) => {
+    await fakeBackend.toggleClientStatus(id);
+    fetchClients();
   };
 
   const handleDownloadQR = async () => {
@@ -97,6 +102,7 @@ const ListQR = () => {
                 <th className="py-3 border-0">EMAIL & PASS</th>
                 <th className="py-3 border-0">LOGIN</th>
                 <th className="py-3 border-0">MENU LINK</th>
+                <th className="py-3 border-0">STATUS</th>
                 <th className="py-3 border-0">ACTION</th>
               </tr>
             </thead>
@@ -145,6 +151,11 @@ const ListQR = () => {
                     </a>
                   </td>
                   <td className="py-3 border-0">
+                    <button onClick={() => handleToggleStatus(item.id)} className="btn btn-link p-0 text-decoration-none shadow-none border-0" title={item.isActive !== false ? "Deactivate Client" : "Activate Client"}>
+                      {item.isActive !== false ? <ToggleRight size={26} className="text-primary" /> : <ToggleLeft size={26} className="text-muted" />}
+                    </button>
+                  </td>
+                  <td className="py-3 border-0">
                     <button className="btn btn-sm text-muted px-2" onClick={() => setEditClient(item)}><Edit size={16} /></button>
                     <button className="btn btn-sm text-danger px-2" onClick={() => handleDeleteClient(item.id)}><Trash2 size={16} /></button>
                   </td>
@@ -152,7 +163,7 @@ const ListQR = () => {
               ))}
               {filteredClients.length === 0 && (
                 <tr>
-                  <td colSpan="7" className="text-center py-5 text-muted border-0">No clients found.</td>
+                  <td colSpan="8" className="text-center py-5 text-muted border-0">No clients found.</td>
                 </tr>
               )}
             </tbody>
