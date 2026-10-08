@@ -16,9 +16,15 @@ const Login = () => {
     try {
       const user = await auth.login(email, password);
       if (user.role === 'super_admin') {
-        navigate('/admin/create-qr');
+        navigate('/admin');
       } else {
-        navigate('/dashboard');
+        if (user.services?.includes('restaurant_menu')) {
+          navigate('/restaurant_menu_dashboard');
+        } else if (user.services?.includes('personal_qr')) {
+          navigate('/personal_qr_dashboard');
+        } else {
+          navigate('/restaurant_menu_dashboard');
+        }
       }
     } catch (err) {
       setError(err.message);

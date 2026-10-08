@@ -12,7 +12,8 @@ const CreateQRPersonal = () => {
 
   const fetchClients = async () => {
     const data = await fakeBackend.getClients();
-    setClients(data);
+    const filteredData = data.filter(c => c.services && c.services.includes('personal_qr'));
+    setClients(filteredData);
   };
 
   useEffect(() => {
@@ -40,21 +41,22 @@ const CreateQRPersonal = () => {
   };
 
   const handleDeleteClient = async (id) => {
-    if (window.confirm("Are you sure you want to delete this client?")) {
-      await fakeBackend.deleteClient(id);
+    if (window.confirm("Are you sure you want to remove the Personal QR service from this client?")) {
+      await fakeBackend.removeServiceFromClient(id, 'personal_qr');
       await fetchClients();
     }
   };
 
   const handleToggleStatus = async (id) => {
-    await fakeBackend.toggleClientServiceSuspension(id);
+    await fakeBackend.toggleClientServiceSuspension(id, 'personal_qr');
     fetchClients();
   };
 
   const handleDownloadQR = async () => {
     if (!viewQR) return;
     try {
-      const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=500x500&data=${encodeURIComponent(window.location.origin + '/' + viewQR.qrToken)}`;
+      const token = viewQR.personalQrToken || viewQR.qrToken;
+      const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=500x500&data=${encodeURIComponent(window.location.origin + '/' + token)}`;
       const response = await fetch(qrUrl);
       const blob = await response.blob();
       const url = window.URL.createObjectURL(blob);
@@ -77,10 +79,11 @@ const CreateQRPersonal = () => {
       role: 'client',
       name: client.name,
       qrToken: client.qrToken,
-      theme: client.theme
+      theme: client.theme,
+      services: client.services || []
     };
     localStorage.setItem('auth_user', JSON.stringify(user));
-    navigate('/dashboard');
+    navigate('/personal_qr_dashboard');
   };
 
   return (
@@ -92,49 +95,59 @@ const CreateQRPersonal = () => {
 
       {/* Table Area */}
       <div className="card shadow-sm border-0 rounded-4 p-4 mt-2">
-        <div className="table-responsive">
-          <table className="table table-hover align-middle">
-            <thead className="table-light text-muted">
+        <div className="table-responsive" style={{ height: 'calc(100vh - 210px)', overflowY: 'auto' }}>
+          <table className="table table-hover align-middle mb-0">
+            <thead className="table-light text-muted position-sticky top-0" style={{ zIndex: 2 }}>
               <tr>
-                <th className="py-3 border-0">S.No.</th>
-                <th className="py-3 border-0">CUSTOMER NAME</th>
-                <th className="py-3 border-0">QR CODE</th>
-                <th className="py-3 border-0">EMAIL & PASS</th>
-                <th className="py-3 border-0">LOGIN</th>
-                <th className="py-3 border-0">MENU LINK</th>
-                <th className="py-3 border-0">STATUS</th>
-                <th className="py-3 border-0">ACTION</th>
+                <th className="py-3 border-0 bg-light">S.No.</th>
+                <th className="py-3 border-0 bg-light">CUSTOMER NAME</th>
+                <th className="py-3 border-0 bg-light">QR & LINKS</th>
+                <th className="py-3 border-0 bg-light">SETUP LINK</th>
+                <th className="py-3 border-0 bg-light">LOGIN</th>
+                <th className="py-3 border-0 bg-light">STATUS</th>
+                <th className="py-3 border-0 bg-light">ACTION</th>
               </tr>
             </thead>
             <tbody>
               {filteredClients.map((item, idx) => (
                 <tr key={item.id}>
                   <td className="py-3 border-0 text-muted">{idx + 1}</td>
-                  <td className="py-3 text-primary fw-bold border-0">{item.name}</td>
                   <td className="py-3 border-0">
-                    <button 
-                      onClick={() => setViewQR(item)}
-                      className="btn btn-sm btn-light border-0 d-flex align-items-center gap-1 text-primary fw-bold"
-                    >
-                      <QrCode size={16} /> View QR
-                    </button>
+                    <div className="fw-bold text-primary">{item.name}</div>
+                    <div className="text-muted small">
+                      <strong>Created:</strong> {item.createdAt ? new Date(item.createdAt).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) : 'N/A'} <br />
+                      <strong>Expires:</strong> {item.serviceExpiries?.['personal_qr'] ? new Date(item.serviceExpiries['personal_qr']).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) : (item.expireAt ? new Date(item.expireAt).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) : 'N/A')}
+                    </div>
                   </td>
-                  <td className="py-3 text-dark border-0">
-                    {item.email ? (
-                      <div className="text-dark">
-                        {item.email}<br /><span className="text-muted">{item.password}</span>
+                  <td className="py-3 border-0">
+                    {item.completedSetups?.includes('personal_qr') ? (
+                      <div className="d-flex flex-column gap-2 align-items-start">
+                        <button 
+                          onClick={() => setViewQR(item)}
+                          className="btn btn-sm btn-light border-0 d-flex align-items-center gap-1 text-primary fw-bold"
+                        >
+                          <QrCode size={16} /> View QR
+                        </button>
+                        <a href={`/${item.personalQrToken || item.qrToken}`} target="_blank" rel="noreferrer" className="btn btn-sm btn-light border-0 text-secondary fw-bold d-flex align-items-center justify-content-center" title="View Public Page" style={{ width: '32px', height: '32px' }}>
+                          <ExternalLink size={16} />
+                        </a>
                       </div>
                     ) : (
-                      <button
-                        className="btn btn-sm text-primary bg-light border-0 fw-bold"
-                        onClick={() => {
-                          navigator.clipboard.writeText(`${window.location.origin}/setup/${item.qrToken}`);
-                          alert('Setup link copied! Send this to the client.');
-                        }}
-                      >
-                        Copy Setup Link
-                      </button>
+                      <span className="text-muted small fst-italic">Awaiting Setup...</span>
                     )}
+                  </td>
+                  <td className="py-3 border-0 text-dark">
+                    <button
+                      className={`btn btn-sm border-0 fw-bold px-3 py-2 rounded-pill ${item.email ? 'bg-light text-muted' : 'text-primary bg-primary bg-opacity-10'}`}
+                      onClick={() => {
+                        navigator.clipboard.writeText(`${window.location.origin}/setup/${item.qrToken}`);
+                        alert('Setup link copied! Send this to the client.');
+                      }}
+                      disabled={!!item.email}
+                      title={item.email ? "Setup is already completed" : "Copy Setup Link"}
+                    >
+                      Copy Setup Link
+                    </button>
                   </td>
                   <td className="py-3 border-0">
                     <button
@@ -154,14 +167,9 @@ const CreateQRPersonal = () => {
                       Login
                     </button>
                   </td>
-                  <td className="py-3 text-dark border-0">
-                    <a href={`/${item.qrToken}`} target="_blank" rel="noreferrer" className="text-dark text-decoration-none hover-primary d-flex align-items-center gap-1">
-                      <ExternalLink size={18} className="text-primary" /> View
-                    </a>
-                  </td>
                   <td className="py-3 border-0">
-                    <button onClick={() => handleToggleStatus(item.id)} className="btn btn-link p-0 text-decoration-none shadow-none border-0" title={item.isServiceSuspended ? "Activate Client" : "Deactivate Client"}>
-                      {!item.isServiceSuspended ? <ToggleRight size={26} className="text-primary" /> : <ToggleLeft size={26} className="text-muted" />}
+                    <button onClick={() => handleToggleStatus(item.id)} className="btn btn-link p-0 text-decoration-none shadow-none border-0" title={item.suspendedServices?.includes('personal_qr') ? "Activate Service" : "Suspend Service"}>
+                      {!(item.suspendedServices?.includes('personal_qr')) ? <ToggleRight size={26} className="text-primary" /> : <ToggleLeft size={26} className="text-muted" />}
                     </button>
                   </td>
                   <td className="py-3 border-0">
@@ -244,7 +252,7 @@ const CreateQRPersonal = () => {
               <div className="modal-body p-4 text-center">
                 <div className="bg-light p-3 rounded-4 mb-4 d-inline-block">
                   <img 
-                    src={`https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(window.location.origin + '/' + viewQR.qrToken)}`} 
+                    src={`https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(window.location.origin + '/' + (viewQR.personalQrToken || viewQR.qrToken))}`} 
                     alt="QR Code" 
                     className="img-fluid rounded" 
                     style={{ width: '200px', height: '200px' }}

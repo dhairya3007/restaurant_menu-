@@ -31,7 +31,15 @@ export const auth = {
     }
     
     if (client) {
-      const user = { id: client.id, email: client.email, role: 'client', name: client.name, qrToken: client.qrToken, theme: client.theme };
+      const user = { 
+        id: client.id, 
+        email: client.email, 
+        role: 'client', 
+        name: client.name, 
+        qrToken: client.qrToken, 
+        theme: client.theme,
+        services: client.services || []
+      };
       localStorage.setItem('auth_user', JSON.stringify(user));
       return user;
     }

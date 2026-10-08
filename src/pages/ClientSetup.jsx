@@ -6,7 +6,7 @@ import { auth } from '../js/auth';
 const ClientSetup = () => {
   const { token } = useParams();
   const navigate = useNavigate();
-  
+
   const [client, setClient] = useState(null);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -19,7 +19,7 @@ const ClientSetup = () => {
       try {
         const clients = await fakeBackend.getClients();
         const foundClient = clients.find(c => c.qrToken === token);
-        
+
         if (!foundClient) {
           setError("Invalid setup link. Please contact your administrator.");
         } else if (foundClient.email && foundClient.password) {
@@ -33,7 +33,7 @@ const ClientSetup = () => {
         setLoading(false);
       }
     };
-    
+
     verifyToken();
   }, [token]);
 
@@ -41,12 +41,12 @@ const ClientSetup = () => {
     e.preventDefault();
     setSaving(true);
     setError('');
-    
+
     try {
       // 0. Check for email uniqueness
       const clients = await fakeBackend.getClients();
       const emailExists = clients.some(c => c.email === email && c.id !== client.id);
-      
+
       if (emailExists) {
         setError("This email is already taken. Please use a different email.");
         setSaving(false);
@@ -55,12 +55,12 @@ const ClientSetup = () => {
 
       // 1. Update the client in the database with the new email and password
       await fakeBackend.updateClient(client.id, { email, password });
-      
+
       // 2. Automatically log them in
       await auth.login(email, password);
-      
+
       // 3. Redirect to dashboard
-      navigate('/dashboard');
+      navigate('/restaurant_menu_dashboard');
     } catch (err) {
       setError(err.message || "Failed to set up account.");
       setSaving(false);
@@ -77,7 +77,7 @@ const ClientSetup = () => {
           {client && <p className="text-muted fs-5">Welcome, <span className="fw-bold text-dark">{client.name}</span>!</p>}
           <p className="text-muted small">Please create your login credentials below to access your dashboard.</p>
         </div>
-        
+
         {error ? (
           <div className="alert alert-warning text-center border-0 rounded-3">
             <p className="mb-3 fw-bold">{error}</p>
@@ -87,9 +87,9 @@ const ClientSetup = () => {
           <form onSubmit={handleSetup}>
             <div className="mb-3">
               <label className="form-label fw-bold text-muted">Set Your Email</label>
-              <input 
-                type="email" 
-                className="form-control" 
+              <input
+                type="email"
+                className="form-control"
                 placeholder="your@email.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
@@ -99,9 +99,9 @@ const ClientSetup = () => {
             </div>
             <div className="mb-4">
               <label className="form-label fw-bold text-muted">Set Your Password</label>
-              <input 
-                type="text" 
-                className="form-control" 
+              <input
+                type="text"
+                className="form-control"
                 placeholder="Create a password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}

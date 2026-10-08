@@ -9,16 +9,24 @@ import Login from './pages/Login';
 import ClientSetup from './pages/ClientSetup';
 
 // Client Dashboard Pages
-import Dashboard from './pages/Dashboard';
-import BusinessDetails from './pages/BusinessDetails';
-import CategoryManagement from './pages/CategoryManagement';
-import DishManagement from './pages/DishManagement';
-import ThemeSelection from './pages/ThemeSelection';
-import MenuPreview from './pages/MenuPreview';
+import RestaurantMenuDashboard from './pages/restaurant_menu/RestaurantMenuDashboard';
+import BusinessDetails from './pages/restaurant_menu/BusinessDetails';
+import CategoryManagement from './pages/restaurant_menu/CategoryManagement';
+import DishManagement from './pages/restaurant_menu/DishManagement';
+
+import MenuPreview from './pages/restaurant_menu/MenuPreview';
+
+// Personal QR Dashboard Pages
+import PersonalQRDashboardLayout from './layouts/PersonalQRDashboardLayout';
+import PersonalQRDashboard from './pages/personal_qr/PersonalQRDashboard';
+import InquiriesPage from './pages/personal_qr/InquiriesPage';
+
+// Public Dispatcher
+import RouteDispatcher from './pages/public/RouteDispatcher';
 
 // Super Admin Pages
 import AdminDashboard from './pages/admin/AdminDashboard';
-import CreateQR from './pages/admin/CreateQR';
+import CreateQR from './pages/admin/CreateQRrestaurent_menu';
 import CreateQRPersonal from './pages/admin/CreateQRPersonal';
 import Profile from './pages/Profile';
 
@@ -37,26 +45,39 @@ function App() {
         </Route>
 
         {/* Client Dashboard Routes */}
-        <Route path="/dashboard" element={<DashboardLayout />}>
-          <Route index element={<Dashboard />} />
+        <Route path="/restaurant_menu_dashboard" element={<DashboardLayout />}>
+          <Route index element={<RestaurantMenuDashboard />} />
           <Route path="business" element={<BusinessDetails />} />
           <Route path="categories" element={<CategoryManagement />} />
           <Route path="dishes" element={<DishManagement />} />
-          <Route path="themes" element={<ThemeSelection />} />
+
+          <Route path="profile" element={<Profile />} />
+        </Route>
+
+        {/* Personal QR Dashboard Routes */}
+        <Route path="/personal_qr_dashboard" element={<PersonalQRDashboardLayout />}>
+          <Route index element={<PersonalQRDashboard />} />
+          <Route path="inquiries" element={<InquiriesPage />} />
           <Route path="profile" element={<Profile />} />
         </Route>
 
         {/* Super Admin Routes */}
         <Route path="/admin" element={<AdminLayout />}>
           <Route index element={<AdminDashboard />} />
-          <Route path="create-qr" element={<CreateQR />} />
+          <Route path="create-qr-RestaurantMenu" element={<CreateQR />} />
+          <Route path="create-qr/restaurant_menu" element={<CreateQR />} />
+          <Route path="create-qr-restaurant" element={<CreateQR />} />
+          <Route path="restaurant_menu" element={<CreateQR />} />
           <Route path="create-qr-personal" element={<CreateQRPersonal />} />
+          <Route path="create-qr/personal_qr" element={<CreateQRPersonal />} />
+          <Route path="create-qr-personal-qr" element={<CreateQRPersonal />} />
+          <Route path="personal_qr" element={<CreateQRPersonal />} />
           <Route path="profile" element={<Profile />} />
         </Route>
 
         {/* Catch-all Public Route (MUST BE AT THE BOTTOM to prevent collisions) */}
         <Route element={<BlankLayout />}>
-          <Route path="/:token" element={<MenuPreview />} />
+          <Route path="/:token" element={<RouteDispatcher />} />
         </Route>
       </Routes>
     </Router>

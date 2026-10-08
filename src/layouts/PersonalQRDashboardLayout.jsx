@@ -4,7 +4,7 @@ import Sidebar from '../components/Sidebar';
 import { auth } from '../js/auth';
 import { Maximize, Minimize } from 'lucide-react';
 
-const DashboardLayout = () => {
+const PersonalQRDashboardLayout = () => {
   const navigate = useNavigate();
   const [isSidebarHovered, setIsSidebarHovered] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
@@ -65,4 +65,4 @@ const DashboardLayout = () => {
   );
 };
 
-export default DashboardLayout;
+export default PersonalQRDashboardLayout;

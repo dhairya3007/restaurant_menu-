@@ -1,9 +1,25 @@
-import React, { useState } from 'react';
-import { Outlet } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { Outlet, useNavigate } from 'react-router-dom';
 import AdminSidebar from '../components/AdminSidebar';
+import { auth } from '../js/auth';
 
 const AdminLayout = () => {
   const [isSidebarHovered, setIsSidebarHovered] = useState(false);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const user = auth.getCurrentUser();
+    if (!user) {
+      navigate('/login');
+    } else if (user.role !== 'super_admin') {
+      // Redirect clients away from admin area
+      if (user.services && user.services.includes('personal_qr') && !user.services.includes('restaurant_menu')) {
+        navigate('/personal_qr_dashboard');
+      } else {
+        navigate('/restaurant_menu_dashboard');
+      }
+    }
+  }, [navigate]);
 
   return (
     <div className="d-flex" style={{ minHeight: '100vh', background: '#f8f9fc' }}>
