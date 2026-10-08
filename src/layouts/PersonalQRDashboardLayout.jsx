@@ -47,6 +47,18 @@ const PersonalQRDashboardLayout = () => {
       >
         {/* Top Navbar */}
         <div className="w-100 d-flex justify-content-end align-items-center p-3" style={{ background: '#fff', borderBottom: '1px solid #e0e0e0', zIndex: 10, position: 'sticky', top: 0 }}>
+          {localStorage.getItem('original_admin_user') && (
+            <button 
+              onClick={() => {
+                localStorage.setItem('auth_user', localStorage.getItem('original_admin_user'));
+                localStorage.removeItem('original_admin_user');
+                window.location.href = '/admin';
+              }}
+              className="btn btn-danger btn-sm fw-bold me-auto shadow-sm"
+            >
+              Exit Impersonation & Return to Admin
+            </button>
+          )}
           <button 
             onClick={toggleFullScreen} 
             className="btn btn-light shadow-sm d-flex align-items-center justify-content-center p-2 rounded-circle border"
