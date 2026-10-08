@@ -8,7 +8,19 @@ const AdminLayout = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    const user = auth.getCurrentUser();
+    let user = auth.getCurrentUser();
+
+    // Auto-restore admin session if they were impersonating a client and clicked back to /admin
+    if (user && user.role !== 'super_admin') {
+      const originalAdmin = localStorage.getItem('original_admin_user');
+      if (originalAdmin) {
+        localStorage.setItem('auth_user', originalAdmin);
+        localStorage.removeItem('original_admin_user');
+        window.location.reload();
+        return;
+      }
+    }
+
     if (!user) {
       navigate('/login');
     } else if (user.role !== 'super_admin') {

@@ -74,6 +74,12 @@ const CreateQR = () => {
   };
 
   const handleAdminAutoLogin = (client) => {
+    // Save current admin session before impersonating
+    const currentAdmin = localStorage.getItem('auth_user');
+    if (currentAdmin && JSON.parse(currentAdmin).role === 'super_admin') {
+      localStorage.setItem('original_admin_user', currentAdmin);
+    }
+
     const user = {
       id: client.id,
       email: client.email,
