@@ -56,26 +56,11 @@ const ClientSetup = () => {
       // 1. Update the client in the database with the new email and password
       await fakeBackend.updateClient(client.id, { email, password });
 
-      // 2. Check if a Super Admin is currently logged in
-      const currentUser = auth.getCurrentUser();
-      
-      if (currentUser && currentUser.role === 'super_admin') {
-        // Super Admin is doing the setup. Do NOT overwrite their session.
-        alert("Client Setup Complete! The client can now log in with these credentials.");
-        navigate('/admin'); 
-      } else {
-        // 3. Normal user doing their own setup. Automatically log them in.
-        await auth.login(email, password);
-        
-        // 4. Redirect to appropriate dashboard
-        if (client.services?.includes('restaurant_menu')) {
-          navigate('/restaurant_menu_dashboard');
-        } else if (client.services?.includes('personal_qr')) {
-          navigate('/personal_qr_dashboard');
-        } else {
-          navigate('/restaurant_menu_dashboard');
-        }
-      }
+      // 2. Automatically log them in
+      await auth.login(email, password);
+
+      // 3. Redirect to dashboard
+      navigate('/restaurant_menu_dashboard');
     } catch (err) {
       setError(err.message || "Failed to set up account.");
       setSaving(false);
