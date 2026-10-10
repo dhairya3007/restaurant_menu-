@@ -60,7 +60,13 @@ const ClientSetup = () => {
       await auth.login(email, password);
 
       // 3. Redirect to dashboard
-      navigate('/restaurant_menu_dashboard');
+      if (client.services?.includes('restaurant_menu')) {
+        navigate('/restaurant_menu_dashboard');
+      } else if (client.services?.includes('personal_qr')) {
+        navigate('/personal_qr_dashboard');
+      } else {
+        navigate('/restaurant_menu_dashboard');
+      }
     } catch (err) {
       setError(err.message || "Failed to set up account.");
       setSaving(false);
