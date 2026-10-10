@@ -17,7 +17,6 @@ import DishManagement from './pages/restaurant_menu/DishManagement';
 import MenuPreview from './pages/restaurant_menu/MenuPreview';
 
 // Personal QR Dashboard Pages
-import PersonalQRDashboardLayout from './layouts/PersonalQRDashboardLayout';
 import PersonalQRDashboard from './pages/personal_qr/PersonalQRDashboard';
 import InquiriesPage from './pages/personal_qr/InquiriesPage';
 
@@ -55,7 +54,7 @@ function App() {
         </Route>
 
         {/* Personal QR Dashboard Routes */}
-        <Route path="/personal_qr_dashboard" element={<PersonalQRDashboardLayout />}>
+        <Route path="/personal_qr_dashboard" element={<DashboardLayout />}>
           <Route index element={<PersonalQRDashboard />} />
           <Route path="inquiries" element={<InquiriesPage />} />
           <Route path="profile" element={<Profile />} />

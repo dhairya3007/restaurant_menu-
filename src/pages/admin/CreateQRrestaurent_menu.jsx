@@ -90,7 +90,7 @@ const CreateQR = () => {
       services: client.services || []
     };
     localStorage.setItem('auth_user', JSON.stringify(user));
-    
+
     if (user.services?.includes('restaurant_menu')) {
       navigate('/restaurant_menu_dashboard');
     } else if (user.services?.includes('personal_qr')) {
@@ -108,10 +108,10 @@ const CreateQR = () => {
 
   const openModalForEdit = (client) => {
     setIsEdit(true);
-    setNewClient({ 
-      ...client, 
+    setNewClient({
+      ...client,
       serviceDurations: client.serviceDurations || {},
-      services: client.services || [] 
+      services: client.services || []
     });
     setShowModal(true);
   };
@@ -157,7 +157,7 @@ const CreateQR = () => {
     <div>
       {/* Header Area */}
       <div className="d-flex justify-content-between align-items-center mb-4">
-        <h3 className="fw-bold text-dark m-0">Order List</h3>
+        <h3 className="fw-bold text-dark m-0">QR List For Restaurant Menu</h3>
       </div>
 
       {/* Table Area */}
@@ -207,10 +207,11 @@ const CreateQR = () => {
                       <div className="d-flex align-items-center gap-2">
                         <button
                           onClick={() => setViewQR(client)}
-                          className="btn btn-sm btn-light border-0 text-primary fw-bold"
+                          className="btn btn-sm btn-light border-0 d-flex align-items-center justify-content-center text-primary fw-bold"
                           title="View & Download QR"
+                          style={{ width: '32px', height: '32px' }}
                         >
-                          <QrCode size={16} /> QR
+                          <QrCode size={16} />
                         </button>
                         <a href={`/${client.qrToken}`} target="_blank" rel="noreferrer" className="btn btn-sm btn-light border-0 text-secondary fw-bold d-flex align-items-center justify-content-center" title="View Public Page" style={{ width: '32px', height: '32px' }}>
                           <ExternalLink size={16} />
@@ -288,9 +289,9 @@ const CreateQR = () => {
                           <div key={srv.id} className={`p-3 rounded-3 border ${isSelected ? 'border-primary bg-primary bg-opacity-10' : 'border-light bg-light'}`} style={{ transition: 'all 0.2s' }}>
                             <div className="d-flex align-items-center justify-content-between mb-2">
                               <div className="form-check m-0 d-flex align-items-center gap-2">
-                                <input 
-                                  className="form-check-input" 
-                                  type="checkbox" 
+                                <input
+                                  className="form-check-input"
+                                  type="checkbox"
                                   id={`srv-${srv.id}`}
                                   checked={isSelected}
                                   onChange={() => handleServiceToggle(srv.id)}
@@ -301,18 +302,18 @@ const CreateQR = () => {
                                 </label>
                               </div>
                             </div>
-                            
+
                             {isSelected && (
                               <div className="mt-3 pt-3 border-top d-flex align-items-center justify-content-between">
                                 <span className="small fw-bold text-muted">Plan Duration (Months):</span>
-                                <input 
-                                  type="number" 
-                                  min="1" 
-                                  className="form-control form-control-sm text-center fw-bold" 
+                                <input
+                                  type="number"
+                                  min="1"
+                                  className="form-control form-control-sm text-center fw-bold"
                                   style={{ width: '80px' }}
                                   value={newClient.serviceDurations?.[srv.id] || ''}
                                   onChange={(e) => setNewClient({
-                                    ...newClient, 
+                                    ...newClient,
                                     serviceDurations: { ...newClient.serviceDurations, [srv.id]: e.target.value }
                                   })}
                                 />

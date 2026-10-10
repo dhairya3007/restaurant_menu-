@@ -172,15 +172,19 @@ const AdminDashboard = () => {
                     </div>
                   </td>
                   <td className="py-4 px-4">
-                    <div className="d-flex flex-wrap gap-2">
-                      {client.services && client.services.map(s => {
+                    <div className="d-flex flex-column gap-2">
+                    {client.services && client.services.length > 0 ? (
+                      client.services.map(s => {
                         const srv = AVAILABLE_SERVICES.find(x => x.id === s);
                         return (
-                          <span key={s} className="badge bg-primary bg-opacity-10 text-primary rounded-pill px-3 py-2 shadow-sm" style={{ fontWeight: '600', letterSpacing: '0.3px', fontSize: '12px' }}>
-                            {srv ? srv.shortName : s}
-                          </span>
+                          <div key={s} className="d-flex align-items-center bg-primary bg-opacity-10 px-2 py-1 rounded shadow-sm" style={{ fontSize: '13px', width: 'fit-content' }}>
+                            <span className="text-primary fw-bold">{srv ? srv.shortName : s}</span>
+                          </div>
                         );
-                      })}
+                      })
+                    ) : (
+                      <span className="text-muted fst-italic" style={{ fontSize: '13px' }}>No Services</span>
+                    )}
                     </div>
                   </td>
                   <td className="py-4 px-4">
@@ -205,18 +209,24 @@ const AdminDashboard = () => {
                     )}
                     </div>
                   </td>
-                  <td className="py-4 px-4">
+                  <td className="py-4 px-4 text-center">
                     <button
-                      className="btn btn-sm btn-light border fw-bold d-flex align-items-center gap-2 px-3 py-2 rounded-pill shadow-sm"
+                      className={`btn btn-sm border d-flex align-items-center justify-content-center p-2 rounded-circle shadow-sm mx-auto ${client.email ? 'bg-light text-muted' : 'btn-light text-dark'}`}
                       onClick={() => {
                         navigator.clipboard.writeText(`${window.location.origin}/setup/${client.qrToken}`);
                         alert('General Setup link copied! Send this to the client.');
                       }}
-                      style={{ color: '#4b5563', transition: 'all 0.2s ease' }}
-                      onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = '#eef2ff'; e.currentTarget.style.borderColor = '#c7d2fe'; }}
-                      onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = '#f8f9fa'; e.currentTarget.style.borderColor = '#dee2e6'; }}
+                      disabled={!!client.email}
+                      title={client.email ? "Setup already completed" : "Copy Setup Link"}
+                      style={{ 
+                        width: '36px', height: '36px',
+                        transition: 'all 0.2s ease',
+                        cursor: client.email ? 'not-allowed' : 'pointer'
+                      }}
+                      onMouseEnter={(e) => { if(!client.email) { e.currentTarget.style.backgroundColor = '#eef2ff'; e.currentTarget.style.borderColor = '#c7d2fe'; } }}
+                      onMouseLeave={(e) => { if(!client.email) { e.currentTarget.style.backgroundColor = '#f8f9fa'; e.currentTarget.style.borderColor = '#dee2e6'; } }}
                     >
-                      <Copy size={14} /> Copy Link
+                      <Copy size={16} />
                     </button>
                   </td>
                   <td className="py-4 px-4 text-center">

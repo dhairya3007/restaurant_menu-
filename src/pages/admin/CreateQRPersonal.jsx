@@ -18,7 +18,7 @@ const CreateQRPersonal = () => {
 
   useEffect(() => {
     fetchClients();
-    
+
     // Listen for changes from other tabs to auto-refresh
     const handleStorageChange = (e) => {
       if (e.key === 'restaurant_db_clients') {
@@ -96,7 +96,7 @@ const CreateQRPersonal = () => {
     <div>
       {/* Header Area */}
       <div className="d-flex justify-content-between align-items-center mb-4">
-        <h3 className="fw-bold text-dark m-0">QR List</h3>
+        <h3 className="fw-bold text-dark m-0">QR List For Personal</h3>
       </div>
 
       {/* Table Area */}
@@ -107,8 +107,8 @@ const CreateQRPersonal = () => {
               <tr>
                 <th className="py-3 border-0 bg-light">S.No.</th>
                 <th className="py-3 border-0 bg-light">CUSTOMER NAME</th>
-                <th className="py-3 border-0 bg-light">QR & LINKS</th>
                 <th className="py-3 border-0 bg-light">SETUP LINK</th>
+                <th className="py-3 border-0 bg-light">QR & LINKS</th>
                 <th className="py-3 border-0 bg-light">LOGIN</th>
                 <th className="py-3 border-0 bg-light">STATUS</th>
                 <th className="py-3 border-0 bg-light">ACTION</th>
@@ -125,23 +125,6 @@ const CreateQRPersonal = () => {
                       <strong>Expires:</strong> {item.serviceExpiries?.['personal_qr'] ? new Date(item.serviceExpiries['personal_qr']).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) : (item.expireAt ? new Date(item.expireAt).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) : 'N/A')}
                     </div>
                   </td>
-                  <td className="py-3 border-0">
-                    {item.completedSetups?.includes('personal_qr') ? (
-                      <div className="d-flex flex-column gap-2 align-items-start">
-                        <button 
-                          onClick={() => setViewQR(item)}
-                          className="btn btn-sm btn-light border-0 d-flex align-items-center gap-1 text-primary fw-bold"
-                        >
-                          <QrCode size={16} /> View QR
-                        </button>
-                        <a href={`/${item.personalQrToken || item.qrToken}`} target="_blank" rel="noreferrer" className="btn btn-sm btn-light border-0 text-secondary fw-bold d-flex align-items-center justify-content-center" title="View Public Page" style={{ width: '32px', height: '32px' }}>
-                          <ExternalLink size={16} />
-                        </a>
-                      </div>
-                    ) : (
-                      <span className="text-muted small fst-italic">Awaiting Setup...</span>
-                    )}
-                  </td>
                   <td className="py-3 border-0 text-dark">
                     <button
                       className={`btn btn-sm border-0 fw-bold px-3 py-2 rounded-pill ${item.email ? 'bg-light text-muted' : 'text-primary bg-primary bg-opacity-10'}`}
@@ -156,15 +139,33 @@ const CreateQRPersonal = () => {
                     </button>
                   </td>
                   <td className="py-3 border-0">
+                    {item.completedSetups?.includes('personal_qr') ? (
+                      <div className="d-flex align-items-center gap-2">
+                        <button
+                          onClick={() => setViewQR(item)}
+                          className="btn btn-sm btn-light border-0 d-flex align-items-center justify-content-center text-primary fw-bold"
+                          title="View QR"
+                          style={{ width: '32px', height: '32px' }}
+                        >
+                          <QrCode size={16} />
+                        </button>
+                        <a href={`/${item.personalQrToken || item.qrToken}`} target="_blank" rel="noreferrer" className="btn btn-sm btn-light border-0 text-secondary fw-bold d-flex align-items-center justify-content-center" title="View Public Page" style={{ width: '32px', height: '32px' }}>
+                          <ExternalLink size={16} />
+                        </a>
+                      </div>
+                    ) : (
+                      <span className="text-muted small fst-italic">Awaiting Setup...</span>
+                    )}
+                  </td>
+                  <td className="py-3 border-0">
                     <button
                       onClick={() => handleAdminAutoLogin(item)}
-                      className="btn text-white px-3 py-1 border-0"
-                      style={{ 
-                        backgroundColor: item.email ? '#5e35b1' : '#a7a7a7', 
-                        fontSize: '13px', 
-                        borderRadius: '4px', 
-                        fontWeight: '500', 
-                        minWidth: '90px',
+                      className="btn text-white px-3 py-1 border-0 shadow-sm"
+                      style={{
+                        backgroundColor: item.email ? '#5e35b1' : '#a7a7a7',
+                        fontSize: '12px',
+                        borderRadius: '4px',
+                        fontWeight: 'bold',
                         cursor: item.email ? 'pointer' : 'not-allowed'
                       }}
                       disabled={!item.email}
@@ -179,7 +180,6 @@ const CreateQRPersonal = () => {
                     </button>
                   </td>
                   <td className="py-3 border-0">
-                    <button className="btn btn-sm text-muted px-2" onClick={() => setEditClient(item)}><Edit size={16} /></button>
                     <button className="btn btn-sm text-danger px-2" onClick={() => handleDeleteClient(item.id)}><Trash2 size={16} /></button>
                   </td>
                 </tr>
@@ -257,14 +257,14 @@ const CreateQRPersonal = () => {
               </div>
               <div className="modal-body p-4 text-center">
                 <div className="bg-light p-3 rounded-4 mb-4 d-inline-block">
-                  <img 
-                    src={`https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(window.location.origin + '/' + (viewQR.personalQrToken || viewQR.qrToken))}`} 
-                    alt="QR Code" 
-                    className="img-fluid rounded" 
+                  <img
+                    src={`https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(window.location.origin + '/' + (viewQR.personalQrToken || viewQR.qrToken))}`}
+                    alt="QR Code"
+                    className="img-fluid rounded"
                     style={{ width: '200px', height: '200px' }}
                   />
                 </div>
-                <button 
+                <button
                   onClick={handleDownloadQR}
                   className="btn text-white w-100 fw-bold py-2 d-flex justify-content-center align-items-center gap-2"
                   style={{ backgroundColor: '#5e35b1', borderRadius: '8px' }}
